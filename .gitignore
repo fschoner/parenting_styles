@@ -37,3 +37,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Data
+src/original_data/*
+
+# Documents and Literature
+src/docs/*
