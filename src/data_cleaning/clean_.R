@@ -37,27 +37,25 @@ keep_p <- c(
   # Breastfeeding duration
   str_c("p52620", 0:1),
   # Communicative gestures,
-  str_c("p1010", 1:2, 0),
+  #str_c("p1010", 1:2, 0),
   # Receptive language
-  "p102040", "p102010",
+  #"p102040", "p102010",
   #Productive language
-  str_c("p1020", 2:3, 0),
+  #str_c("p1020", 2:3, 0),
   #Cognition: means‐end task
-  "p103040",
+  #"p103040",
   #(Fine) Motor skills
-  str_c("p1040", c(1, 2), 0), "p104040_v1",
+  #str_c("p1040", c(1, 2), 0), "p104040_v1",
   # Sibling year of birth (1-3)
   str_c("p73222y_w", 1:3),
-  # Collective activities, pretending
-  str_c("p28131", 1:6), "p281326",
   # Cognition
-  "p103060", "p101050",
+  #"p103060", "p101050",
   # Productive language
   str_c("p1020", 5:6, 0), str_c("p10207", 1:3),
   # Cognition
-  str_c("p1030", c(1, 5), 0),
+  #str_c("p1030", c(1, 5), 0),
   # Fine) Motor skills: 
-  str_c("p1040", 4:7, 0),
+  #str_c("p1040", 4:7, 0),
   # Books at home, HOMEPOS
   "p34005a", str_c("p34006", c("d", "h", "e", "j", "f")),
   # Employment 12 month prior to birth 
@@ -103,8 +101,46 @@ df_parent <- read_dta(str_c(path_in_data, "SC1_pParent_D_8-0-0.dta")) %>%
   setDT(., key = c("ID_t", "wave")) %>%
   .[, .SD, .SDcols = keep_p]
 
+# Check what negative values there are
+#vals <- unique(as.vector(as.matrix(df_parent)))
+#sort(vals[vals < 0])
 
+for (col in names(df_parent)) {
+  set(
+    df_parent,
+    i = which(df_parent[[col]] %in% c(-98:-90, -54, -53, -23:-20)),
+    j = col,
+    value = NA
+  )
+}
 
+# parenting styles items
+cols_ps <- c(
+  # Parenting styles (powerful enforcement, W6)
+  str_c("p66813", letters[1:4]),
+  #Parenting styles (emotional warmth, W7)
+  str_c("p66810", letters[1:3]), 
+  #Parenting styles (inconsistent parenting, W5, 7; see age gradient!)
+  str_c("p66812", letters[1:4]), 
+  #Parenting styles (negative communication, W5, 7)
+  str_c("p66811", letters[1:3]),
+  #Parenting styles (monitoring, W7)
+  str_c("p66814", letters[1:4]),
+  # Parenting styles (autonomy, W6, 8)
+  str_c("p66816", letters[1:5]),
+  # Parenting styles (pos. parent. behav., W8)
+  str_c("p66818", letters[1:3]),
+  # Parenting styles (psych. control, W8; could be used for disagreement?)
+  str_c("p66817", letters[1:3])
+)
+df_p_ps <- df_parent %>%
+  .[wave %in% c(6:8), .SD, .SDcols = c("ID_t", "wave", cols_ps)] %>%
+  .[,
+    (cols_ps) := lapply(.SD, function(x) as.vector(scale(x))),
+    .SDcols = cols_ps,
+    by = "wave"
+    ] %>%
+  .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_ps]
 
 # Find out and merge the daatsets with the relevant information.
 # To check selective attrition would need all SES variables b/c those are the
@@ -112,8 +148,6 @@ df_parent <- read_dta(str_c(path_in_data, "SC1_pParent_D_8-0-0.dta")) %>%
 # Check out Rauh/Renée how exactly their data look like and then also del bono, 
 # Dohmen
 
-# I need xTargetCompetencies and xDirectMeasures
-path_in_data <- "src/original_data/"
 
 keep_dm <- c(
   "ID_t", str_c("wave_w", 1:3),
@@ -134,9 +168,11 @@ keep_dm <- c(
 
 
 df_dm <- read_dta(str_c(path_in_data, "SC1_xDirectMeasures_D_8-0-0.dta")) %>%
+  # Convert to data.table
   setDT(., key = c("ID_t")) %>%
+  # Keep only columns from above
   .[, .SD, .SDcols = keep_dm] %>%
-  # COnvert to panel format
+  # Convert to panel format
   melt(
     .,
     id.vars = c("ID_t"), 
@@ -164,9 +200,14 @@ df_dm <- read_dta(str_c(path_in_data, "SC1_xDirectMeasures_D_8-0-0.dta")) %>%
     ),
     variable.name = "wave"
   ) %>%
+  # Sort by ID
   setorderv(., "ID_t") 
 
+# Note that instead of measure.vars = list(data_avail = ...) I coul've used
+# measure.vars = patterns(data_avail = "^ihn1p001") but like this it is more
+# transparent such that I can look up which variables exactly are in.
 
+# Replace negative values by missings.
 for (col in names(df_dm)) {
   set(
     df_dm,
@@ -175,24 +216,102 @@ for (col in names(df_dm)) {
     value = NA
   )
 }
+
+# Scale the interaction items by wave (wave FE), mainly to remove age effects.
 cols <- names(df_dm)[names(df_dm) %like% "_(p|c)"]
-# Scale the columns by wave
+# Scale
 df_dm %>%
   .[, 
     (cols) := lapply(.SD, function(x) as.vector(scale(x))),
     .SDcols = cols,
     by = "wave"
   ]
+# Check whether there are correlations across waves of the values?!
 
-#works
-df_t <- df_dm %>%
-  .[, by = "wave", lapply(.SD, sd, na.rm = T), .SDcols = cols]
+cols_dm <- c(names(df_dm)[names(df_dm) %like% "_(p|c)$"], "not_speak")
+df_dm_cs <- df_dm %>%
+  .[!deviations == 1, ] %>%
+  .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_dm]
 
-# standardize in each wave before taking individual-specific averages.
-# and read about them.
+# Did the scaling work? (also with mean)
+#df_t <- df_dm %>%
+#  .[, by = "wave", lapply(.SD, mean, na.rm = T), .SDcols = cols]
 
 
 
+# FOr SON-R, create own outcome (sum of solved items = 1), and compare it to WLE
+# -> are they correlated?
+keep_tc <- c(
+  "ID_t", str_c("wave_w", c(4, 6)),
+  # Delayed Gratification: waiting time, has waited (W4 and W6)
+  "den40002", "den40001_c", "den60002", "den60001_c",
+  # SON-R (W4): items, WLE, SE
+  str_c("can4000", 1:9), str_c("can400", 10:15), str_c("can4_sc", 1:2),
+  # Vocabulary: sum of correct items, ceiling set (W4 and W6)
+  "von4_sc3", "von4cs_sc8", "von6_sc3", "von6cs_sc9"
+)
+
+df_tc <- read_dta(str_c(path_in_data, "SC1_xTargetCompetencies_D_8-0-0.dta")) %>%
+  setDT(., key = "ID_t") %>%
+  .[, .SD, .SDcols = keep_tc]
+
+for (col in names(df_tc)) {
+  set(
+    df_tc,
+    i = which(df_tc[[col]] %in% c(-21:-25, -55, -56, -94)),
+    j = col,
+    value = NA
+  )
+}
+
+sr_items <- names(df_tc)[names(df_tc) %like% "^can4"] 
+df_tc_sr <- df_tc %>%
+  .[, .SD, .SDcols = c("ID_t", "wave_w4", sr_items)] %>%
+  .[
+    wave_w4 == 1,
+    sr_sum := rowSums(.SD, na.rm = TRUE), .SDcols = patterns("can\\d{5}")
+    ] %>%
+  .[, names(df_tc)[which(grepl("can\\d{5}", names(df_tc)))] := NULL] %>%
+  .[, wave := 4] %>%
+  .[, "wave_w4" := NULL]
+# do they correlate?
+cor(df_tc_sr$sr_sum, df_tc_sr$can4_sc1, use = "complete.obs")
+
+df_tc <- df_tc %>%
+  .[, (sr_items) := NULL] %>%
+  melt(
+    .,
+    id.vars = "ID_t",
+    measure.vars = patterns(
+      wav_avail = "^wave_w",
+      dg_waiting_time = "den(4|6)0002",
+      dg_waited = "den(4|6)0001_c",
+      voc_sum = "von(4|6)_sc3",
+      voc_ceil = "von(4|6)cs_sc(8|9)"
+    ),
+    variable.name = "wave"
+  ) %>%
+  # Code wave correctly
+  .[, wave := fcase(
+    wave == 1, 4,
+    wave == 2, 6
+  )] %>%
+  # Sort by ID
+  setorderv(., "ID_t") 
+
+df_tc <- merge.data.table(
+  x = df_tc, y = df_tc_sr, by = c("ID_t", "wave"),
+  all.x = TRUE
+  )
+
+cols_tc <- c(names(df_tc)[names(df_tc) %like% "^(dg|voc|sr)"], "can4_sc1") 
+df_tc %>%
+  .[, 
+    (cols_tc) := lapply(.SD, function(x) as.vector(scale(x))),
+    .SDcols = cols_tc,
+    by = "wave"
+    ]
+# Check distributions of all of these things
 
 
 
