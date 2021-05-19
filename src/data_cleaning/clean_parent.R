@@ -10,6 +10,7 @@ library(hrbrthemes)
 
 # Paths for datasets.
 path_in_data <- "src/original_data/"
+path_out_data <- "bld/out/data/"
 
 
 # The first set of items just goes through the codebook on pParent from the 
@@ -22,7 +23,7 @@ cols_basic <- c(
   # Week of pregnancy at birth
   #"p529100",
   # Weight at birth
-  "p529000_R",
+  #"p529000_R",
   # Temperament
   #str_c("p66804", c("c", "e", "f", "k", "n", "o")),
   # Coparenting
@@ -150,16 +151,16 @@ df_parent <- read_dta(str_c(path_in_data, "SC1_pParent_D_8-0-0.dta")) %>%
   setnames(
     .,
     old = c(
-      "p529000_R", "p526200", "p34005a", "p731501", "p731601",
+      "p526200", "p34005a", "p731501", "p731601",
       "pb10000", "p700010", "p731701", "p731702", "p731110",
       "p400000", "p403000", "p400500_g1",
       "p510005_g1", "p517100", "p515051", "p515100"
     ),
     new = c(
-      "birthweight", "dur_bf_month", "nof_books", "unemp", "unemp_p",
+      "dur_bf_month", "nof_books", "unemp", "unemp_p",
       "nof_siblings", "fem_child", "fem_parent", "mom_responds", "married",
       "germborn", "germborn_p", "migback",
-      "net_hh_inc", "trust", "risk", "patience"
+      "net_hh_inc", "nc_trust", "nc_risk", "nc_patience"
     )
   )
 
@@ -297,51 +298,12 @@ df_p_ps <- df_p_ps %>%
   # multiple times.
   .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_ps_agg] %>%
   # This reduces the number of observations drastically.
-  na.omit()
+  na.omit() %>%
+  fwrite(., str_c(path_out_data, "df_parent_styles_cs.csv"))
 
 # Remove parenting styles columns from dataframe.
 df_parent[, (cols_ps) := NULL]
 
-# Plot pairwise scatterplots
-pairs(df_p_ps[, -1], lower.panel = NULL)
-
-# # PCA
-# ps_pca <- prcomp(df_p_ps_2[, -1], scale = TRUE)
-# ps_pca
-# 
-# ps_var <- ps_pca$sdev^2
-# # proportion of variance explained
-# ps_var/sum(ps_var)
-# # cumulative
-# cumsum(ps_var)/sum(ps_var)
-# 
-# # Plot, looks interesting
-# biplot(ps_pca)
-# 
-# # predictions
-# ps_pred <- predict(ps_pca)
-
-# Estimate Gaussian Mixture Model
-gmm <- Mclust(df_p_ps[, -1])
-gmm$classification
-df_p_ps %>%
-  .[, class := gmm$classification]
-summary(gmm)
-#plot(gmm)
-
-
-
-# This keeps all single items, but apart from that does the same as above.
-# Keep this as robustness check: what happens if I build rowMeans only afterwards?
-# df_p_ps <- df_parent %>%
-# .[wave %in% c(6:8), .SD, .SDcols = c("ID_t", "wave", cols_ps)] %>%
-# .[,
-#   (cols_ps) := lapply(.SD, function(x) as.vector(scale(x, scale = FALSE))),
-#   .SDcols = cols_ps,
-#   by = "wave"
-#   ] %>%
-# .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_ps] %>%
-# na.omit()
 
 
 
@@ -361,25 +323,36 @@ df_p_ca <- df_p_ca %>%
   .[,
     time_invest := lapply(.SD, function(x) as.vector(scale(x))),
     .SDcols = "time_invest"
-  ]
+  ] %>%
+  fwrite(., str_c(path_out_data, "df_collective_act_cs.csv"))
 
 df_parent[, (cols_ca) := NULL]
 
 
 
-df_p_test <- merge.data.table(
-  df_p_ca[, c("ID_t", "time_invest")],
-  df_p_ps[, c("ID_t", "class")],
-  by = "ID_t",
-  all.x = TRUE
-) %>%
-  na.omit() %>%
-  .[, class := as.factor(class)]
-  
+# Build SES cross-section
 
-plot <- ggplot(df_p_test, aes(x = time_invest, group = class, fill = class)) +
-  geom_density(adjust=1.5, alpha=.4) + 
-  theme_ipsum()
+df_ses <- copy(df_parent)
+cols_ses <- c(
+  "unemp", "unemp_p", "fem_child", "married", "germborn", "germborn_p",
+  "migback", "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "fh_abi",
+  "fh_abi_p",
+  "low_ses_books", "ID_t"
+)
+cols_nc <- str_subset(cols_ses, "^nc_")
+df_ses <- df_ses %>%
+  .[, .SD, .SDcols = cols_ses] %>%
+  .[, lapply(.SD, mean, na.rm = TRUE), by = "ID_t"] %>%
+  .[, (cols_nc) := lapply(.SD, function(x) as.vector(scale(x))), 
+    .SDcols = cols_nc
+    ] %>%
+  .[, both_p_abi := fcase(
+    fh_abi == 1 & fh_abi_p == 1, 1,
+    fh_abi == 0 | fh_abi == 0, 0
+  )] %>%
+  fwrite(., str_c(path_out_data, "df_ses_nc.csv"))
+
+
 
 # Find out and merge the daatsets with the relevant information.
 # To check selective attrition would need all SES variables b/c those are the
