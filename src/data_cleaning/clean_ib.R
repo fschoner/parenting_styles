@@ -9,15 +9,6 @@ path_in_data <- "src/original_data/"
 path_out_data <- "bld/out/data/"
 
 
-# Recommended to use CohortProfile as the starting point of any analysis.
-df_cp <- read_dta(str_c(path_in_data, "SC1_CohortProfile_D_8-0-0.dta")) %>%
-  setDT(., key = c("ID_t", "wave")) %>%
-  # Drop variables which are the same for all participants or not of interest
-  .[, c("cohort", "tx80107", "tx80533", "tx80524", "tx80529") := NULL]
-
-
-
-
 keep_dm <- c(
   "ID_t", str_c("wave_w", 1:3),
   # Data vailable W1, W2, W3
@@ -96,11 +87,33 @@ for (col in names(df_dm)) {
 cols_dm <- c(names(df_dm)[names(df_dm) %like% "_(p|c)$"], "not_speak")
 df_dm_cs <- df_dm %>%
   #.[!deviations == 1, ] %>%
-  .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_dm]# %>%
-fwrite(str_c(path_out_data, "df_ib_cs.csv"))
-
-# Does the correlational pattern hold here, too?
-cor(
-  df_dm_cs[, c("sens_n_stress_p", "intrusiveness_p", "detachment_p")],
-  use = "complete.obs"
+  .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_dm] %>%
+  .[, (cols_dm) := lapply(.SD, function(x) as.vector(scale(x))), .SDcols = cols_dm] %>%
+  .[,
+    qib_m := rowMeans(.SD),
+    .SDcols = c("sens_n_stress_p", "pos_regard_p", "emotionality_p", "stimulation_p")
+    ] %>%
+  na.omit()
+# PCA
+ps_pca <- prcomp(
+  df_dm_cs %>%
+    .[, c("sens_n_stress_p", "pos_regard_p", "emotionality_p", "stimulation_p")]
 )
+# Predictions
+ps_pred <- predict(ps_pca)
+# Add principal components to dataframe
+df_dm_cs[, c("PC1", "PC2") := list(ps_pred[, 1], ps_pred[, 2])] %>%
+  # Write to disc.
+  fwrite(., str_c(path_out_data, "df_ib_cs.csv"))
+
+cor(df_dm_cs$PC1, df_dm_cs$qib_m)
+
+# ps_var <- ps_pca$sdev^2
+# # cumulative
+# cumsum(ps_var)/sum(ps_var)
+# # Plot, looks interesting
+# biplot(ps_pca)
+# # predictions
+# ps_pred <- predict(ps_pca)
+#plot(ps_pred[, 1:2], xlab = "PC1", ylab = "PC2")
+# perfectly negatively correlated
