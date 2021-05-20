@@ -88,7 +88,7 @@ cols_dm <- c(names(df_dm)[names(df_dm) %like% "_(p|c)$"], "not_speak")
 df_dm_cs <- df_dm %>%
   #.[!deviations == 1, ] %>%
   .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_dm] %>%
-  .[, (cols_dm) := lapply(.SD, function(x) as.vector(scale(x))), .SDcols = cols_dm] %>%
+  #.[, (cols_dm) := lapply(.SD, function(x) as.vector(scale(x))), .SDcols = cols_dm] %>%
   .[,
     qib_m := rowMeans(.SD),
     .SDcols = c("sens_n_stress_p", "pos_regard_p", "emotionality_p", "stimulation_p")

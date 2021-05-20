@@ -12,7 +12,7 @@ library(hrbrthemes)
 path_in_data <- "src/original_data/"
 path_out_data <- "bld/out/data/"
 
-
+source("src/functions/functions.r")
 # The first set of items just goes through the codebook on pParent from the 
 # start and contains the things I deem worth of keeping.
 # The second set focuses more specifically on the main categories of items I 
@@ -297,6 +297,10 @@ df_p_ps <- df_p_ps %>%
   # Build individual means across waves. See above which items were elicited
   # multiple times.
   .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_ps_agg] %>%
+  #.[, 
+  #  (cols_ps_agg) := lapply(.SD, function(x) as.vector(scale(x))),
+  #  .SDcols = cols_ps_agg,
+  #] %>%
   # This reduces the number of observations drastically.
   na.omit() %>%
   fwrite(., str_c(path_out_data, "df_parent_styles_cs.csv"))
@@ -311,6 +315,8 @@ df_parent[, (cols_ps) := NULL]
 df_p_ca <- copy(df_parent)
 df_p_ca <- df_p_ca %>%
   .[wave %in% c(1:5), .SD, .SDcols = c("ID_t", "wave", cols_ca)] %>%
+  # Reverse scales.
+  .[, (cols_ca) := lapply(.SD, rev_likert, min = 1, max = 5), .SDcols = cols_ca] %>%
   # Get rid of age FE.
   .[,
     (cols_ca) := lapply(.SD, function(x) as.vector(scale(x, scale = FALSE))),
