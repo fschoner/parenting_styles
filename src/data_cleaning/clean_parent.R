@@ -72,7 +72,7 @@ cols_basic <- c(
   # rules for use of media
   #str_c("p20241", 0:2), "p208450",
   # religiousness
-  #"p435000",
+  "p435000",
   # domestic learning environment
   #str_c("p28136", 2:7),
   # Gender child
@@ -112,8 +112,11 @@ cols_basic <- c(
   # Social trust (W7), Gen. willing. to take risk (W7), patience (W7)
   "p517100", "p515051", "p515100",
   # Parenting goals (first 3 status, 2 autonomy, 2 competencies)
+  # c is (impotance of) obedience, d is independence, f is diligence 
   str_c("p67800", letters[1:7])
 )
+
+cols_pg <- str_c("p67800", letters[1:7])
 
 cols_ca <- c(
   # Collective activities (W1)
@@ -154,13 +157,13 @@ df_parent <- read_dta(str_c(path_in_data, "SC1_pParent_D_8-0-0.dta")) %>%
       "p526200", "p34005a", "p731501", "p731601",
       "pb10000", "p700010", "p731701", "p731702", "p731110",
       "p400000", "p403000", "p400500_g1",
-      "p510005_g1", "p517100", "p515051", "p515100"
+      "p510005_g1", "p517100", "p515051", "p515100", "p435000"
     ),
     new = c(
       "dur_bf_month", "nof_books", "unemp", "unemp_p",
       "nof_siblings", "fem_child", "fem_parent", "mom_responds", "married",
       "germborn", "germborn_p", "migback",
-      "net_hh_inc", "nc_trust", "nc_risk", "nc_patience"
+      "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "religious"
     )
   )
 
@@ -219,9 +222,9 @@ df_parent %>%
     mom_responds == 2, 0
   )] %>%
   .[, married := fcase(
-    married %in% c(1, 2, 6), 1,
+    married %in% c(1, 6), 1,
     # divorced, widowed, single
-    married %in% c(3:5), 0
+    married %in% c(2:5), 0
   )] %>%
   .[, `:=` (
     germborn = fcase(
@@ -343,7 +346,7 @@ cols_ses <- c(
   "unemp", "unemp_p", "fem_child", "married", "germborn", "germborn_p",
   "migback", "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "fh_abi",
   "fh_abi_p",
-  "low_ses_books", "ID_t"
+  "low_ses_books", "ID_t", "religious"
 )
 cols_nc <- str_subset(cols_ses, "^nc_")
 df_ses <- df_ses %>%
@@ -359,6 +362,25 @@ df_ses <- df_ses %>%
   fwrite(., str_c(path_out_data, "df_ses_nc.csv"))
 
 
+
+# Parenting goals to validate classes
+df_pg <- copy(df_parent)
+df_pg <- df_pg %>%
+  .[wave == 2, .SD, .SDcols = c("ID_t", "wave", cols_pg)] %>%
+  # standardize
+  .[, (cols_pg) := lapply(.SD, function(x) as.vector(scale(x))),
+    .SDcols = cols_pg] %>%
+  setnames(
+    ., 
+    old = str_c("p67800", letters[1:7]),
+    # could differ by gender.
+    new = c(
+      "respected", "assertive", "obedient", "independent", "own_opin",
+      "diligent", "sense_of_resp"
+      )
+  ) %>%
+  .[, !c("wave")] %>%
+  fwrite(., str_c(path_out_data, "df_pg.csv"))
 
 # Find out and merge the daatsets with the relevant information.
 # To check selective attrition would need all SES variables b/c those are the

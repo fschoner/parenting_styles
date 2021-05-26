@@ -5,102 +5,225 @@ library(data.table)
 library(viridis)
 library(hrbrthemes)
 library(mclust)
+library(factoextra)
+library(ggpubr)
 
 
 # Paths for datasets.
 path_in_data <- "src/original_data/"
 path_out_data <- "bld/out/data/"
+source("src/functions/functions.r")
 
 
-
+# Read all datasets.
 df_p_ps <- fread(str_c(path_out_data, "df_parent_styles_cs.csv"))
 df_p_ca <- fread(str_c(path_out_data, "df_collective_act_cs.csv"))
 df_ib <- fread(str_c(path_out_data, "df_ib_cs.csv"))
 df_ses <- fread(str_c(path_out_data, "df_ses_nc.csv"))
-plot(density(df_p_ps$emot_warmth))
+df_cogn <- fread(str_c(path_out_data, "df_target_competencies_cs.csv"))
+df_pg <- fread(str_c(path_out_data, "df_pg.csv"))
+#plot(density(df_p_ps$emot_warmth))
 
-# Check few basic correlations
-df_ib_ca <- merge.data.table(
-  df_p_ca, df_ib, by = "ID_t", all.y = TRUE
-) %>%
-  merge.data.table(
-    ., df_p_ps, by = "ID_t", all.y = TRUE
-  ) %>%
+# Merge datasets, core is df_p_ps since they are used to derive the classifica-
+# tion.
+df_ib_ca <- merge.data.table(df_p_ca, df_ib, by = "ID_t", all = TRUE) %>%
+  merge.data.table(., df_p_ps, by = "ID_t", all.y = TRUE) %>%
+  merge.data.table(., df_cogn, by = "ID_t", all.x = TRUE) %>%
   merge.data.table(., df_ses, all.x = TRUE) %>%
-  na.omit()
-cor(df_ib_ca$time_invest, df_ib_ca$PC1)
-cor(df_ib_ca$time_invest, df_ib_ca$monitoring)
-cor(df_ib_ca$time_invest, df_ib_ca$low_ses_books)
-cor(df_ib_ca$time_invest, df_ib_ca$nc_patience)
-cor(df_ib_ca$time_invest, df_ib_ca$married)
-cor(df_ib_ca$time_invest, df_ib_ca$migback)
-cor(df_ib_ca$time_invest, df_ib_ca$stimulation_p)
+  merge.data.table(., df_pg, all.x = TRUE)
+
+
+# Check a few basic correlations.
+cor(df_ib_ca$qib_m, df_ib_ca$PC1, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$PC1, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$monitoring, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$low_ses_books, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$nc_patience, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$married, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$migback, use = "complete.obs")
+cor(df_ib_ca$time_invest, df_ib_ca$stimulation_p, use = "complete.obs")
 
 
 # Plot pairwise scatterplots
-pairs(df_p_ps[, -1], lower.panel = NULL)
+#pairs(df_p_ps[, -1], lower.panel = NULL)
 
-# # PCA
-# ps_pca <- prcomp(df_p_ps_2[, -1], scale = TRUE)
-# ps_pca
-# 
-# ps_var <- ps_pca$sdev^2
-# # proportion of variance explained
-# ps_var/sum(ps_var)
-# # cumulative
-# cumsum(ps_var)/sum(ps_var)
-# 
-# # Plot, looks interesting
-# biplot(ps_pca)
-# 
-# # predictions
-# ps_pred <- predict(ps_pca)
+
 
 # Estimate Gaussian Mixture Model
 gmm <- Mclust(df_p_ps[, - c(1)])
-df_p_ps %>%
-  .[, class := gmm$classification]
 summary(gmm)
+# Add classification, uncertainty and class probabilities to dataset.
+df_ib_ca %>%
+  .[,  `:=` (
+    class = gmm$classification, uncert = gmm$uncertainty, pr_1 = gmm$z[, 1],
+    pr_2 = gmm$z[, 2], pr_3 = gmm$z[, 3]
+    )] 
 
+# Proportions of classes.
+tabulate(gmm$classification) / nrow(df_p_ps)
 # class probabilities
-round(gmm$z, 4)
-# uncertainties, how are they computed?
-summary(round(gmm$uncertainty,4))
-summary(gmm)
-plot(gmm)
-round(gmm$parameters$mean, 3)
 
-round(colMeans(df_p_ps), 4)
-# ONLY LEARN ON ITEMS YOU CAN UNDOUBTEDLY CLASSIFY AS AR AV PE,
-# OR CLASSIFY based on single items st. don't need to average
+# Plot to investigate BIC's, densities (although I'm unsure what they might tell
+# me).
+#plot(gmm)
 
-
-df_p_test <- merge.data.table(
-  df_p_ca[, c("ID_t", "time_invest")],
-  df_p_ps[, c("ID_t", "class")],
-  by = "ID_t",
-  all.x = TRUE
+# Means of the classes
+cols <- str_c("mean_cl_", 1:3)
+mean_class_df <- data.table(
+  item = rownames(gmm$parameters$mean),
+  mean_cl_1 = gmm$parameters$mean[, 1],
+  mean_cl_2 = gmm$parameters$mean[, 2],
+  mean_cl_3 = gmm$parameters$mean[, 3],
+  item_mean = colMeans(df_p_ps[, -1])
 ) %>%
-  na.omit() %>%
-  .[, class := as.factor(class)] %>%
+  # Subtract raw item means to facilitate above/below-mean interpretations.
+  .[, (cols) := lapply(.SD, "-", item_mean), .SDcols = patterns("^mean_cl")]
+
+
+
+# Find out more about classes
+
+#1) What do they mean for interaction behaviors of parents and other parental
+# characteristics?
+#df_ib_ca <- df_ib_ca %>%
+  #.[uncert < quantile(uncert)[4], ]
+summary(df_ib_ca$nc_patience)
+summary(df_ib_ca$dg_waiting_time)
+df_ib_ca %>%
+  .[, dis_pat := abs(nc_patience - dg_waiting_time)] %>%
+  .[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("_(p|c)$")]
+# 1 are the AV ;-), but they invest less time.
+df_ib_ca %>%
+  .[,
+    by = "class",
+    lapply(.SD, mean, na.rm = T),
+    .SDcols = c(
+      "not_speak", "qib_m", "dg_waited", "dg_waiting_time", "voc_sum", "can4_sc1",
+      "sr_sum", "unemp", "fem_child", "married", "germborn", "migback", "net_hh_inc",
+      "nc_trust", "nc_risk", "nc_patience", "fh_abi", "low_ses_books", "time_invest",
+      "dis_pat", "obedient", "independent", "diligent", "religious", "own_opin",
+      "sense_of_resp"
+      )
+    ]
+
+
+
+# AR (class 1) surprisingly sensitive, less intrusive than AV!, bit more detached
+# than AV, more stimulating than AV!, more pos_regard, less neg_regard than AV,
+# less emotionality than AV, overall qib roughly the same.
+# p slightly more often unemployed but m slightly less,
+# p and m more often germborn, p more often abi, m substantially more often
+# They have more better tempered c's with lower activity than AV, and their c's
+# have better sustained attention than AV but not PE
+# Class 1 highest SES, is more risk taking, a lot more trusting, less patient
+# than AV, have more income, less migback, more often married. Interestingly, they
+# have substantially more boys.
+# Regarding (non)cognitive skills, their kids have substantially better vocab and son-r
+# scores, and they are more patient. 
+
+
+
+#2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+df_ib_ca %>%
+  .[, parenting_style := fcase(
+    class == 1, "AR",
+    class == 2, "AV",
+    class == 3, "PE"
+  )] %>%
+  .[, class := factor(parenting_style, levels = c("AR", "AV", "PE"))] %>%
   .[, class2 := as.factor(sample(c(1:3), size = 1504, replace = TRUE))]
 
 t.test(
-  df_p_test[class == 2, "time_invest"],
-  df_p_test[class == 3, "time_invest"],
+  df_ib_ca[class == "AV", "time_invest"],
+  df_ib_ca[class == "PE", "time_invest"],
   alternative = "t"
   )
 
-plot <- ggplot(df_p_test, aes(x = time_invest, group = class, fill = class)) +
-  geom_density(adjust=1.5, alpha=.4) + 
+density_cols <- c("time_invest", "qib_m", "voc_sum", "sr_sum")
+plot_list <- purrr::map(density_cols, density_plot, df = df_ib_ca)
+
+ggarrange(plotlist = plot_list, nrow = 2, ncol = 2,
+          common.legend = TRUE, legend = "bottom")
+
+plot <- ggplot(df_ib_ca, aes(x = time_invest, group = class, fill = class)) +
+  geom_density(adjust = 1.5, alpha = .4) + 
   theme_ipsum()
 plot
 
 
 
 
+
+ggplot(df_ib_ca, aes(x = class, y = low_ses_books, fill = class)) +
+  geom_boxplot() +
+  geom_jitter(shape = 16, position = position_jitter(0.2), alpha = 0.5) +
+  xlab("") +
+  ylab("") +
+  ggtitle("Hi") +
+  labs(fill = "PS")
+
+
+
+ggplot(df_ib_ca, aes(x = class ,group = low_ses_books)) +
+  geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count")
+
+  #Density plots for which vars?
+
+df_ib_ca %>%
+  group_by(class, low_ses_books) %>%
+  drop_na(class, low_ses_books) %>%
+  summarize(n() / sum (n()))
+
+ha <- df_ib_ca %>%
+  .[!is.na("class") & !is.na("low_ses_books")] %>%
+  .[, by = c("class", "low_ses_books"), .N] %>%
+  .[, by = c("low_ses_book"), ]
+
 # Try GMM on ib's
 df_ib_p <- df_ib %>%
   .[, .SD, .SDcols = patterns("_p$")]
 gmm_ib <- Mclust(df_ib_p, warn = T)
 summary(gmm_ib)
+
+
+
+
+
+
+fit <- princomp(df_p_ps[, - c(1)], cor=TRUE)
+plot(fit, type = "lines")
+summary(fit)
+biplot(fit) 
+fit$scores
+
+
+pca_res <- prcomp(df_p_ps[, - c(1)], scale = TRUE)
+pc_fac <- factor(df_p_ps[, 1])
+fviz_pca_var(pca_res,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+)
+# Conclusion of all this: PCA finds 3 components according to eigenvalue 
+# criterion. Ofc, we should investigate the robustness more thoroughly, 
+# but in the interest of time, I'll work with the classification provided by 
+# the GMM
