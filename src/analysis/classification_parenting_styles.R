@@ -12,6 +12,7 @@ library(ggpubr)
 # Paths for datasets.
 path_in_data <- "src/original_data/"
 path_out_data <- "bld/out/data/"
+path_out_analysis <- "bld/out/analysis/"
 source("src/functions/functions.r")
 
 
@@ -85,8 +86,8 @@ mean_class_df <- data.table(
 
 #1) What do they mean for interaction behaviors of parents and other parental
 # characteristics?
-#df_ib_ca <- df_ib_ca %>%
-  #.[uncert < quantile(uncert)[4], ]
+df_ib_ca <- df_ib_ca %>%
+  .[uncert < quantile(uncert)[4], ]
 summary(df_ib_ca$nc_patience)
 summary(df_ib_ca$dg_waiting_time)
 # both standardized

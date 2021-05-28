@@ -43,19 +43,19 @@ df_dm <- read_dta(str_c(path_in_data, "SC1_xDirectMeasures_D_8-0-0.dta")) %>%
       dat_avail = c("ihn1m001_c", "ihn1m001_sc1n2_c", "ihn1m001_sc1n3_c"), 
       # Parent
       #sens_stress_p = c("ihn1p001_c", "ihn1p001_sc1n2_c", "ihn1p001_sc1n3_c"),
-      sens_n_stress_p = c("ihn1p002_c", "ihn1p002_sc1n2_c", "ihn1p002_sc1n3_c"), 
-      intrusiveness_p = c("ihn1p003_c", "ihn1p003_sc1n2_c", "ihn1p003_sc1n3_c"),
-      detachment_p = c("ihn1p004_c", "ihn1p004_sc1n2_c", "ihn1p004_sc1n3_c"),
-      stimulation_p = c("ihn1p005_c", "ihn1p005_sc1n2_c", "ihn1p015_sc1n3_c"),
-      pos_regard_p = c("ihn1p006_c", "ihn1p006_sc1n2_c", "ihn1p006_sc1n3_c"),
-      neg_regard_p = c("ihn1p007_c", "ihn1p007_sc1n2_c", "ihn1p007_sc1n3_c"),
-      emotionality_p = c("ihn1p008_c", "ihn1p008_sc1n2_c", "ihn1p008_sc1n3_c"),
+      sens_n_stress_p_ib = c("ihn1p002_c", "ihn1p002_sc1n2_c", "ihn1p002_sc1n3_c"), 
+      intrusiveness_p_ib = c("ihn1p003_c", "ihn1p003_sc1n2_c", "ihn1p003_sc1n3_c"),
+      detachment_p_ib = c("ihn1p004_c", "ihn1p004_sc1n2_c", "ihn1p004_sc1n3_c"),
+      stimulation_p_ib = c("ihn1p005_c", "ihn1p005_sc1n2_c", "ihn1p015_sc1n3_c"),
+      pos_regard_p_ib = c("ihn1p006_c", "ihn1p006_sc1n2_c", "ihn1p006_sc1n3_c"),
+      neg_regard_p_ib = c("ihn1p007_c", "ihn1p007_sc1n2_c", "ihn1p007_sc1n3_c"),
+      emotionality_p_ib = c("ihn1p008_c", "ihn1p008_sc1n2_c", "ihn1p008_sc1n3_c"),
       # Child
-      pos_mood_c = c("ihn1c001_c", "ihn1c001_sc1n2_c", "ihn1c001_sc1n3_c"),
-      neg_mood_c = c("ihn1c002_c", "ihn1c002_sc1n2_c", "ihn1c002_sc1n3_c"),
-      activity_lvl_c = c("ihn1c003_c", "ihn1c003_sc1n2_c", "ihn1c003_sc1n3_c"),
-      ns_sust_att_c = c("ihn1c004_c", "ihn1c004_sc1n2_c", "ihn1c004_sc1n3_c"),
-      pos_engage_c = c("ihn1c005_c", "ihn1c005_sc1n2_c", "ihn1c005_sc1n3_c"),
+      pos_mood_c_ib = c("ihn1c001_c", "ihn1c001_sc1n2_c", "ihn1c001_sc1n3_c"),
+      neg_mood_c_ib = c("ihn1c002_c", "ihn1c002_sc1n2_c", "ihn1c002_sc1n3_c"),
+      activity_lvl_c_ib = c("ihn1c003_c", "ihn1c003_sc1n2_c", "ihn1c003_sc1n3_c"),
+      ns_sust_att_c_ib = c("ihn1c004_c", "ihn1c004_sc1n2_c", "ihn1c004_sc1n3_c"),
+      pos_engage_c_ib = c("ihn1c005_c", "ihn1c005_sc1n2_c", "ihn1c005_sc1n3_c"),
       # Deviation from standard, parent does not speak
       deviations = c("ihn1m004_c", "ihn1m004_sc1n2_c", "ihn1m004_sc1n3_c"),
       not_speak = c("ihn1m005_c", "ihn1m005_sc1n2_c", "ihn1m005_sc1n3_c")
@@ -84,20 +84,28 @@ for (col in names(df_dm)) {
 
 
 # Build a cross section 
-cols_dm <- c(names(df_dm)[names(df_dm) %like% "_(p|c)$"], "not_speak")
+cols_dm <- c(names(df_dm)[names(df_dm) %like% "_ib$"], "not_speak")
 df_dm_cs <- df_dm %>%
   #.[!deviations == 1, ] %>%
   .[, by = "ID_t", lapply(.SD, mean, na.rm = TRUE), .SDcols = cols_dm] %>%
   #.[, (cols_dm) := lapply(.SD, function(x) as.vector(scale(x))), .SDcols = cols_dm] %>%
   .[,
     qib_m := rowMeans(.SD),
-    .SDcols = c("sens_n_stress_p", "pos_regard_p", "emotionality_p", "stimulation_p")
+    .SDcols = c(
+      "sens_n_stress_p_ib", "pos_regard_p_ib",
+      "emotionality_p_ib", "stimulation_p_ib"
+      )
     ] %>%
   na.omit()
 # PCA
 ps_pca <- prcomp(
   df_dm_cs %>%
-    .[, c("sens_n_stress_p", "pos_regard_p", "emotionality_p", "stimulation_p")]
+    .[, c(
+      "sens_n_stress_p_ib",
+      "pos_regard_p_ib",
+      "emotionality_p_ib",
+      "stimulation_p_ib"
+      )]
 )
 # Predictions
 ps_pred <- predict(ps_pca)

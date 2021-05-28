@@ -1,0 +1,21 @@
+I use the self-reported items capturing different dimensions of parenting behavior to come up with a classification of different parenting styles in an unsupervised manner using Gaussian Mixture Modelling
+
+\subsection{GMM}
+\begin{itemize}
+	\item Density estimation, fits a mixture of densities (w/ different mean vectors and variance-covariance matrices) to the data
+	\item Most popular to use normal densities.
+	\item Using EM-algorithm, it chooses the optimal number of densities according to some information criterion
+	and estimates their means and vcovs 
+	\item Derive classification from this procedure by plugging in an observation's x-vector an picking the density where the density value is maximized for the input vector. This directly gives an uncertainty measure since this can be computed for the other estimated densities, too. 
+	\item Use the mean vectors to interpret differences across classes.
+\end{itemize}
+
+\subsection{Results}
+\begin{itemize}
+	\item 3 classes maximizes BIC
+	\item Table 2 shows the mean vectors
+	\item Report class shares here
+	\item sth. on uncertainties. (how are they computed)
+	\item Although inconclusive, seems to pick up sth, see density plot.
+	\item Argue along D/Z that powerful enforcement super important, and which else?
+\end{itemize}
