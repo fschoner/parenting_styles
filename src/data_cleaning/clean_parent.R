@@ -113,7 +113,9 @@ cols_basic <- c(
   "p517100", "p515051", "p515100",
   # Parenting goals (first 3 status, 2 autonomy, 2 competencies)
   # c is (impotance of) obedience, d is independence, f is diligence 
-  str_c("p67800", letters[1:7])
+  str_c("p67800", letters[1:7]),
+  # highest professional qualification, partner
+  "p731813", "p731863"
 )
 
 cols_pg <- str_c("p67800", letters[1:7])
@@ -157,13 +159,16 @@ df_parent <- read_dta(str_c(path_in_data, "SC1_pParent_D_8-0-0.dta")) %>%
       "p526200", "p34005a", "p731501", "p731601",
       "pb10000", "p700010", "p731701", "p731702", "p731110",
       "p400000", "p403000", "p400500_g1",
-      "p510005_g1", "p517100", "p515051", "p515100", "p435000"
+      "p510005_g1", "p517100", "p515051", "p515100", "p435000",
+      "p731813", "p731863", "p73170y", "p73175y"
     ),
     new = c(
       "dur_bf_month", "nof_books", "unemp", "unemp_p",
       "nof_siblings", "fem_child", "fem_parent", "mom_responds", "married",
       "germborn", "germborn_p", "migback",
-      "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "religious"
+      "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "religious",
+      "univ_deg", "univ_deg_p", "age_mom", "age_dad"
+      
     )
   )
 
@@ -181,6 +186,9 @@ df_parent %>%
     p731852 %in% c(4, 5), 1,
     p731852 %in% c(-20, 1:3, 6), 0
   )] %>%
+  # no professional degree
+  .[univ_deg == -20, univ_deg := 0] %>%
+  .[univ_deg_p == -20, univ_deg_p := 0] %>%
   .[, c("p732103") := NULL]
 
 
@@ -191,7 +199,7 @@ df_parent %>%
 for (col in names(df_parent)) {
   set(
     df_parent,
-    i = which(df_parent[[col]] %in% c(-98:-90, -54, -53, -23:-20)),
+    i = which(df_parent[[col]] %in% c(-98:-90, -55:-53, -23:-20)),
     j = col,
     value = NA
   )
@@ -200,8 +208,8 @@ for (col in names(df_parent)) {
 # Recode further variables.
 df_parent %>%
   .[, low_ses_books := fcase(
-    nof_books %in% c(1, 2), 1,
-    nof_books %in% c(3:6), 0
+    nof_books %in% c(1, 2, 3), 1,
+    nof_books %in% c(4:6), 0
   )] %>%
   .[, `:=` (unemp = unemp - 1,
             unemp_p = unemp_p - 1)
@@ -210,6 +218,7 @@ df_parent %>%
     nof_siblings == 0, 0,
     nof_siblings >= 1, 1
   )] %>%
+  .[wave == 1, siblings_at_birth := nof_siblings] %>%
   .[, `:=` (
     fem_child = fcase(
       fem_child == 1, 1,
@@ -240,8 +249,24 @@ df_parent %>%
   .[, migback := fcase(
     migback == 0, 0,
     migback %in% c(1:10), 1
+  )] %>%
+  .[, univ_deg := fcase(
+    univ_deg %in% c(0, 1:7, 17, 19, 21), 0,
+    univ_deg %in% c(8:16), 1
+  )] %>%
+  .[, univ_deg_p := fcase(
+    univ_deg_p %in% c(0, 1:7, 17, 19, 21), 0,
+    univ_deg_p %in% c(8:16), 1
+  )] %>%
+  .[, univ_deg_b := rowSums(.SD, na.rm = T), .SDcols = patterns("^univ_")] %>%
+  .[is.na(univ_deg) & is.na(univ_deg_p), univ_deg_b := NA] %>%
+  .[, both_p_univ_deg := fcase(
+    univ_deg_b == 2, 1,
+    univ_deg_b %in% c(0,1), 0
+    )] %>%
+  .[, `:=`(
+    age_mom = 2012 - age_mom, age_dad = 2012 - age_dad
   )]
-
 
 
 # Build parenting styles.
@@ -346,11 +371,14 @@ cols_ses <- c(
   "unemp", "unemp_p", "fem_child", "married", "germborn", "germborn_p",
   "migback", "net_hh_inc", "nc_trust", "nc_risk", "nc_patience", "fh_abi",
   "fh_abi_p",
-  "low_ses_books", "ID_t", "religious"
+  "low_ses_books", "ID_t", "religious", "univ_deg", "univ_deg_p", "univ_deg_b",
+  "both_p_univ_deg", "age_mom", "age_dad", "siblings_at_birth"
 )
-cols_nc <- str_subset(cols_ses, "^nc_")
+cols_univ <- str_subset(cols_ses, "^univ_deg")
+cols_nc <- c(str_subset(cols_ses, "^nc_"), "net_hh_inc")
 df_ses <- df_ses %>%
   .[, .SD, .SDcols = cols_ses] %>%
+  .[, by = "ID_t", (cols_univ) := lapply(.SD, max_fun), .SDcols = cols_univ] %>%
   .[, lapply(.SD, mean, na.rm = TRUE), by = "ID_t"] %>%
   .[, (cols_nc) := lapply(.SD, function(x) as.vector(scale(x))), 
     .SDcols = cols_nc

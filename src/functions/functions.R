@@ -149,7 +149,7 @@ density_plot <- function(var, df) {
   '
   ggplot(
     df,
-    aes(x = get(var), group = class, fill = class)
+    aes(x = get(var), group = class_plot, fill = class_plot)
   ) +
     geom_density(
       adjust = 1.5, alpha = .4,
@@ -163,7 +163,7 @@ density_plot <- function(var, df) {
       y = ""
     ) +
     xlim(-5, 5) +
-    ylim(0, 0.45)
+    ylim(0, 0.7)
 }
 
 hist_plot <- function(var, cat, df) {
@@ -228,3 +228,5 @@ box_plot <- function(y_var, nam, cat, df) {
     ggtitle(nam) +
     labs(fill = "Median split")
 }
+
+max_fun <- function(x) ifelse( !all(is.na(x)), max(x, na.rm=T), NA)

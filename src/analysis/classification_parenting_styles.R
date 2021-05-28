@@ -89,6 +89,9 @@ mean_class_df <- data.table(
   #.[uncert < quantile(uncert)[4], ]
 summary(df_ib_ca$nc_patience)
 summary(df_ib_ca$dg_waiting_time)
+# both standardized
+
+# Check correlates of class
 df_ib_ca %>%
   .[, dis_pat := abs(nc_patience - dg_waiting_time)] %>%
   .[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("_(p|c)$")]
@@ -102,11 +105,17 @@ df_ib_ca %>%
       "sr_sum", "unemp", "fem_child", "married", "germborn", "migback", "net_hh_inc",
       "nc_trust", "nc_risk", "nc_patience", "fh_abi", "low_ses_books", "time_invest",
       "dis_pat", "obedient", "independent", "diligent", "religious", "own_opin",
-      "sense_of_resp"
+      "sense_of_resp", "univ_deg_b", "both_p_abi"
       )
     ]
+t.test(df_ib_ca[class == 1, "univ_deg_b"], df_ib_ca[class == 2, "univ_deg_b"])
 
-
+# Give labels to classes
+df_ib_ca[, class_lab := fcase(
+  class == 1, "AV",
+  class == 2, "AR",
+  class == 3, "PE"
+)]
 
 # AR (class 1) surprisingly sensitive, less intrusive than AV!, bit more detached
 # than AV, more stimulating than AV!, more pos_regard, less neg_regard than AV,
@@ -142,15 +151,13 @@ df_ib_ca %>%
 
 
 
-
+cols_std <- c("time_invest", "qib_m", "net_hh_inc", "dis_pat", "sr_sum", "voc_sum")
 df_ib_ca %>%
-  .[, parenting_style := fcase(
-    class == 1, "AR",
-    class == 2, "AV",
-    class == 3, "PE"
-  )] %>%
-  .[, class := factor(parenting_style, levels = c("AR", "AV", "PE"))] %>%
-  .[, class2 := as.factor(sample(c(1:3), size = 1504, replace = TRUE))]
+  .[, class_plot := factor(class_lab, levels = c("AR", "AV", "PE"))] %>%
+  #.[, class2_plot := as.factor(sample(c(1:3), size = 1504, replace = TRUE))] %>%
+  .[, (cols_std) := lapply(.SD,  function(x) as.vector(scale(x))), .SDcols = cols_std]
+
+fwrite(df_ib_ca, str_c(path_out_data, "df_class_cs.csv"))
 
 t.test(
   df_ib_ca[class == "AV", "time_invest"],
@@ -158,72 +165,72 @@ t.test(
   alternative = "t"
   )
 
-density_cols <- c("time_invest", "qib_m", "voc_sum", "sr_sum")
+density_cols <- c("time_invest", "qib_m", "net_hh_inc", "dis_pat", "sr_sum", "voc_sum")
 plot_list <- purrr::map(density_cols, density_plot, df = df_ib_ca)
 
-ggarrange(plotlist = plot_list, nrow = 2, ncol = 2,
+ggarrange(plotlist = plot_list, nrow = 3, ncol = 2,
           common.legend = TRUE, legend = "bottom")
 
-plot <- ggplot(df_ib_ca, aes(x = time_invest, group = class, fill = class)) +
-  geom_density(adjust = 1.5, alpha = .4) + 
-  theme_ipsum()
-plot
-
-
-
-
-
-ggplot(df_ib_ca, aes(x = class, y = low_ses_books, fill = class)) +
-  geom_boxplot() +
-  geom_jitter(shape = 16, position = position_jitter(0.2), alpha = 0.5) +
-  xlab("") +
-  ylab("") +
-  ggtitle("Hi") +
-  labs(fill = "PS")
-
-
-
-ggplot(df_ib_ca, aes(x = class ,group = low_ses_books)) +
-  geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count")
-
-  #Density plots for which vars?
-
-df_ib_ca %>%
-  group_by(class, low_ses_books) %>%
-  drop_na(class, low_ses_books) %>%
-  summarize(n() / sum (n()))
-
-ha <- df_ib_ca %>%
-  .[!is.na("class") & !is.na("low_ses_books")] %>%
-  .[, by = c("class", "low_ses_books"), .N] %>%
-  .[, by = c("low_ses_book"), ]
-
-# Try GMM on ib's
-df_ib_p <- df_ib %>%
-  .[, .SD, .SDcols = patterns("_p$")]
-gmm_ib <- Mclust(df_ib_p, warn = T)
-summary(gmm_ib)
-
-
-
-
-
-
-fit <- princomp(df_p_ps[, - c(1)], cor=TRUE)
-plot(fit, type = "lines")
-summary(fit)
-biplot(fit) 
-fit$scores
-
-
-pca_res <- prcomp(df_p_ps[, - c(1)], scale = TRUE)
-pc_fac <- factor(df_p_ps[, 1])
-fviz_pca_var(pca_res,
-             col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE     # Avoid text overlapping
-)
-# Conclusion of all this: PCA finds 3 components according to eigenvalue 
-# criterion. Ofc, we should investigate the robustness more thoroughly, 
-# but in the interest of time, I'll work with the classification provided by 
-# the GMM
+# plot <- ggplot(df_ib_ca, aes(x = time_invest, group = class, fill = class)) +
+#   geom_density(adjust = 1.5, alpha = .4) + 
+#   theme_ipsum()
+# plot
+# 
+# 
+# 
+# 
+# 
+# ggplot(df_ib_ca, aes(x = class, y = low_ses_books, fill = class)) +
+#   geom_boxplot() +
+#   geom_jitter(shape = 16, position = position_jitter(0.2), alpha = 0.5) +
+#   xlab("") +
+#   ylab("") +
+#   ggtitle("Hi") +
+#   labs(fill = "PS")
+# 
+# 
+# 
+# ggplot(df_ib_ca, aes(x = class ,group = low_ses_books)) +
+#   geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count")
+# 
+#   #Density plots for which vars?
+# 
+# df_ib_ca %>%
+#   group_by(class, low_ses_books) %>%
+#   drop_na(class, low_ses_books) %>%
+#   summarize(n() / sum (n()))
+# 
+# ha <- df_ib_ca %>%
+#   .[!is.na("class") & !is.na("low_ses_books")] %>%
+#   .[, by = c("class", "low_ses_books"), .N] %>%
+#   .[, by = c("low_ses_book"), ]
+# 
+# # Try GMM on ib's
+# df_ib_p <- df_ib %>%
+#   .[, .SD, .SDcols = patterns("_p$")]
+# gmm_ib <- Mclust(df_ib_p, warn = T)
+# summary(gmm_ib)
+# 
+# 
+# 
+# 
+# 
+# 
+# fit <- princomp(df_p_ps[, - c(1)], cor=TRUE)
+# plot(fit, type = "lines")
+# summary(fit)
+# biplot(fit) 
+# fit$scores
+# 
+# 
+# pca_res <- prcomp(df_p_ps[, - c(1)], scale = TRUE)
+# pc_fac <- factor(df_p_ps[, 1])
+# fviz_pca_var(pca_res,
+#              col.var = "contrib", # Color by contributions to the PC
+#              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+#              repel = TRUE     # Avoid text overlapping
+# )
+# # Conclusion of all this: PCA finds 3 components according to eigenvalue 
+# # criterion. Ofc, we should investigate the robustness more thoroughly, 
+# # but in the interest of time, I'll work with the classification provided by 
+# # the GMM
