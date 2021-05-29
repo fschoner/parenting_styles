@@ -135,6 +135,11 @@ df_ib_ca[, class_lab := fcase(
 
 
 df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("(p|c)_ib$")]
+
+
+df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = c("obedient", "independent", "diligent")]
+t.test(df_ib_ca[class == 1, "diligent"], df_ib_ca[class == 2, "diligent"])
+
 # AV (class 1) sensitive, less intrusive than AR, bit more detached
 # than AV, more stimulating than AV!, more pos_regard, less neg_regard than AV,
 # less emotionality than AV, overall qib roughly the same.
@@ -234,8 +239,7 @@ ps_mean_pval <- p_ps %>%
     x = mean_class_df, y = ., by = "variable"
   )
 
-df_n <- df_ib_ca[, by = "class_lab", lapply(.SD, mean, na.rm = T), .SDcols = cols_ps] %>%
-  setorderv(., "class_lab")
+df_n <- df_ib_ca[, by = "class_lab", lapply(.SD, mean, na.rm = T), .SDcols = "siblings_at_birth"]
 
 
 

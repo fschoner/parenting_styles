@@ -1,1 +1,19 @@
-This paper extends the empirical measurement of parenting styles \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019}
+\begin{itemize}
+	\item Big picture: Accident of birth, skill gaps open up early, parental investments play a great role, input to production function. D/Z have studied parenting styles.
+	\item Narrow down + research gap:\\ 
+	Narrow down: For the technology of skill formation it is important to understand what different parenting styles mean for the parent-child interaction and how this translates into human capital formation.\\
+	Resarch gap: \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019} derive parenting styles from developmental psychology (cite Baumrind), not from empirics. There is the Q whether this is granular enough, and also whether this characterization captures the relevant dimensions for, say, the technology of skills formation. Can this characterization also be found in the data? Also their context is cross-country, but within-country inequality in outcomes prob. also related to parenting style.  
+	\item This paper: I'm the first to study this in a data-driven manner without imposing a certain characterizations of parenting styles from theory. To this end, I employ Gaussian Mixture Modelling to distinguish different parenting styles based on survey data capturing many different facets of the parent-child interaction. Information criteria indicate that three classes best fit the data. I investigate the classification's result more throughly and contrast it with the styles identified in \textcite{doepkeParentingStyleAltruism2017}. While some dimensions line-up well, others are counterintuitive which is why labelling is difficult / one has to be cautious.
+	\item Data: Panel Dataset, first interview when ... old, allows me to investigate the parent-child relationship very early on. has videotapes measures 
+	\item EMpirical strategy: density estimation technique, has good properties, comes with characterization (means), uncertainties, estimated via E-M. Furthermore TOshed light on parent-child interactions, I use measures derived from videotaped play-interaction using MLOGIT
+	\item results:
+	\begin{enumerate}
+		\item 3 classes best fit data
+		\item In some dimensions the classes line-up well the ones from baumrind / D/Z, some counterintuitive findings
+		\item  I find little evidence of significant differences in parent-child interaction behavior using MLOGIT, also SES variables do not predict too much
+		\item Differences in testscores unrelated to differences in parenting styles. 
+		\item classification predicts time_invest well, lining up well with the fact that siblings_at_birth (look how it is coded) is the onnly SES var predicting parenting style, indicates  that classification happened along time_investment variable, a thing I want to tackle in the next version of this.
+	\end{enumerate} 
+	\item COntrib 1: Atheoretic, data-driven classification of PS, using ML in econ. So far only survey items used to manually classify p.s., sometimes only one item. Rare exception is Rauh/Renee.
+	\item COntrib 2: How do these relate to interaction behaviors early in children’s up-bringing (the most crucial period for skill formation)
+\end{itemize}

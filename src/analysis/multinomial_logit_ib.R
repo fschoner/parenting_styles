@@ -23,7 +23,8 @@ df$class_lab_2 <- relevel(as.factor(df$class_lab), ref = "PE")
 fmla_p_ib <- as.formula(
   str_c(
     "class_lab_2",
-    str_c(c(str_subset(names(df), "(p|c)_ib$"), "age_mom", "siblings_at_birth", "univ_deg", "fem_child"), collapse = " + "),
+    str_c(c(str_subset(names(df), "p_ib$"), "age_mom", "siblings_at_birth", "both_p_abi", "fem_child", "net_hh_inc", "low_ses_books"
+            ), collapse = " + "),
     sep = " ~ "
   )
 )
@@ -45,8 +46,8 @@ fmla_ses <- as.formula(
   str_c(
     "class_lab_2",
     str_c(c(
-      "low_ses_books", "age_mom", "siblings_at_birth", "univ_deg", "net_hh_inc",
-      "married", "migback", "unemp", "fem_child"
+      "low_ses_books", "age_mom", "siblings_at_birth", "both_p_abi", "net_hh_inc",
+      "married", "migback", "unemp", "fem_child", "net_hh_inc"
       ), collapse = " + "),
     sep = " ~ "
   )
@@ -66,9 +67,9 @@ p
 fmla_sr <- as.formula(
   str_c(
     "dg_waiting_time", str_c(c(
-      "D_av", "D_ar", "low_ses_books", "age_mom", "siblings_at_birth",
-      "univ_deg", "net_hh_inc",
-      "married", "migback", "unemp", "fem_child", "time_invest"
+      "D_av", "D_ar", "age_mom", "siblings_at_birth", "both_p_abi",
+      "fem_child", "net_hh_inc", "low_ses_books",
+      "married", "migback", "unemp", "fem_child"#, "time_invest"
     ), collapse = " + "), sep = " ~ "
   )
 )
