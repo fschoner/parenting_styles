@@ -68,6 +68,11 @@ tabulate(gmm$classification) / nrow(df_p_ps)
 # me).
 #plot(gmm)
 
+
+# Drop high-uncertainty observations.
+#df_ib_ca <- df_ib_ca %>%
+# .[uncert < quantile(uncert)[4], ]
+
 # Means of the classes
 cols <- str_c("mean_cl_", 1:3)
 mean_class_df <- data.table(
@@ -78,16 +83,27 @@ mean_class_df <- data.table(
   item_mean = colMeans(df_p_ps[, -1])
 ) %>%
   # Subtract raw item means to facilitate above/below-mean interpretations.
-  .[, (cols) := lapply(.SD, "-", item_mean), .SDcols = patterns("^mean_cl")]
+  #.[, (cols) := lapply(.SD, "-", item_mean), .SDcols = patterns("^mean_cl")] %>%
+  .[, (cols) := lapply(.SD, round, 3), .SDcols = patterns("^mean_cl")] %>%
+  .[, !c("item_mean")] %>%
+  setnames(
+    .,
+    old = c("item", "mean_cl_1", "mean_cl_2", "mean_cl_3"),
+    new = c("variable", "Mean: AV", "Mean: AR", "Mean: PE")
+  )
+# Should be able to export this using xtable.
+cols_ps <- names(df_p_ps)[-1]
+df_ib_ca %>%
+  .[,
+    by = "class",
+    lapply(.SD, mean, na.rm = T),
+    .SDcols = cols_ps]
 
-
-
+t.test(df_ib_ca[class == 1, "power_enforce"], df_ib_ca[class == 2, "power_enforce"])
 # Find out more about classes
 
 #1) What do they mean for interaction behaviors of parents and other parental
 # characteristics?
-df_ib_ca <- df_ib_ca %>%
-  .[uncert < quantile(uncert)[4], ]
 summary(df_ib_ca$nc_patience)
 summary(df_ib_ca$dg_waiting_time)
 # both standardized
@@ -109,7 +125,6 @@ df_ib_ca %>%
       "sense_of_resp", "univ_deg_b", "both_p_abi"
       )
     ]
-t.test(df_ib_ca[class == 1, "univ_deg_b"], df_ib_ca[class == 2, "univ_deg_b"])
 
 # Give labels to classes
 df_ib_ca[, class_lab := fcase(
@@ -118,7 +133,9 @@ df_ib_ca[, class_lab := fcase(
   class == 3, "PE"
 )]
 
-# AR (class 1) surprisingly sensitive, less intrusive than AV!, bit more detached
+
+df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("(p|c)_ib$")]
+# AV (class 1) sensitive, less intrusive than AR, bit more detached
 # than AV, more stimulating than AV!, more pos_regard, less neg_regard than AV,
 # less emotionality than AV, overall qib roughly the same.
 # p slightly more often unemployed but m slightly less,
@@ -129,21 +146,102 @@ df_ib_ca[, class_lab := fcase(
 # than AV, have more income, less migback, more often married. Interestingly, they
 # have substantially more boys.
 # Regarding (non)cognitive skills, their kids have substantially better vocab and son-r
-# scores, and they are more patient. 
+# scores, and they are more patient.
 
 
+# Compute p-values for mean differences in IB. BUt shouldn't I rather show this as 
+# MultinomialLogit output?
+ib_av_ar <- df_ib_ca %>%
+  .[class %in% c(1, 2),] 
+
+ib_av_pe <- df_ib_ca %>%
+  .[class %in% c(1, 3),]
+
+ib_ar_pe <- df_ib_ca %>%
+  .[class %in% c(2, 3),]
+
+p_ib_av_ar <- ib_av_ar %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AV vs. AR)"))
+
+p_ib_av_pe <- ib_av_pe %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AV vs. PE)"))
+
+p_ib_ar_pe <- ib_ar_pe %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AR vs. PE)"))
+
+
+p_ib <- merge.data.table(
+  x = p_ib_av_ar, y = p_ib_av_pe, by = "variable"
+) %>%
+  merge.data.table(x = ., y = p_ib_ar_pe, by = "variable")
+
+cols_p_vals <- str_subset(names(p_ib), "^p")
+
+p_ib[, (cols_p_vals) := lapply(.SD, round, 3), .SDcols = cols_p_vals]
+
+cols_ib <- str_subset(names(df_ib_ca), "(p|c)_ib$")
+means_ib <- df_ib_ca %>%
+  .[, by = "class_lab", lapply(.SD, mean, na.rm = T), .SDcols = patterns("(p|c)_ib$")] 
+
+means_ib_f <- data.table(
+  variable = colnames(means_ib)[-1],
+  Mean_AV = as.double(means_ib[class_lab == "AV", -1]),
+  Mean_AR = as.double(means_ib[class_lab == "AR", -1]),
+  Mean_PE = as.double(means_ib[class_lab == "PE", -1])
+) 
+
+cols_ib_f <- str_subset(names(means_ib_f), "^Mean")
+means_ib_f[, (cols_ib_f) := lapply(.SD, round, 3), .SDcols = cols_ib_f]
+
+merge_ib <- merge.data.table(
+  x = means_ib_f, y = p_ib, by = "variable"
+)
 
 #2)
+# NOw the same classes means of parenting styles.
+cols_ps <- names(df_p_ps)[-1]
+
+p_ps_av_ar <- ib_av_ar %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AV vs. AR)"))
+
+p_ps_av_pe <- ib_av_pe %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AV vs. PE)"))
+
+p_ps_ar_pe <- ib_ar_pe %>%
+  .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
+  melt(.) %>%
+  setnames(., old = c("value"), new = c("p (AR vs. PE)"))
+
+p_ps <- merge.data.table(
+  x = p_ps_av_ar, y = p_ps_av_pe, by = "variable"
+) %>%
+  merge.data.table(x = ., y = p_ps_ar_pe, by = "variable")
+
+cols <- str_subset(names(p_ps), "^p")
+ps_mean_pval <- p_ps %>%
+  .[, (cols) := lapply(.SD, round, 3), .SDcols = cols] %>%
+  merge.data.table(
+    x = mean_class_df, y = ., by = "variable"
+  )
+
+df_n <- df_ib_ca[, by = "class_lab", lapply(.SD, mean, na.rm = T), .SDcols = cols_ps] %>%
+  setorderv(., "class_lab")
 
 
 
 
 
-
-
-
-
-
+str(df_ib_ca$class_lab)
 
 
 
