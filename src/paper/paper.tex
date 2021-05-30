@@ -1,5 +1,6 @@
 \documentclass[a4paper,captions=tableheading,12pt]{scrartcl}
 \usepackage[top=2cm,bottom=2cm,right=2cm,left=3cm,footskip=30pt]{geometry}
+\usepackage[onehalfspacing]{setspace}
 %\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 %\usepackage[USenglish]{babel}
@@ -7,7 +8,8 @@
 \usepackage{amssymb}
 \usepackage[flushleft]{threeparttable}
 \usepackage{mathtools}
-\usepackage[backend=biber, style=authoryear, citestyle=authoryear, uniquename=false, firstinits=true, maxbibnames=5, minbibnames=1, maxcitenames=2, mincitenames=1, uniquelist=false]{biblatex}
+\usepackage{booktabs}
+\usepackage[backend=biber, style=authoryear, citestyle=authoryear, uniquename=false, firstinits=true, maxbibnames=5, minbibnames=1, maxcitenames=2, mincitenames=1, uniquelist=false, datelabel=short, labeldate=year, alldates=year]{biblatex}
 \addbibresource{lib_parenting_styles.bib}
 \usepackage[sc]{mathpazo}
 \usepackage{hyperref}
@@ -18,6 +20,8 @@
 	citecolor={red!70!black},
 	%urlcolor={blue!80!black}
 } 
+%\usepackage{cite}
+\usepackage{bm}
 \tolerance=1
 \emergencystretch=\maxdimen
 \hyphenpenalty=10000
@@ -67,6 +71,9 @@
 	
 	\section{Validation} \label{sec:validation}
 	\input{chapter/validation.tex}
+	
+	\section{Conclusion} \label{sec:conclusion}
+	\input{chapter/conclusion.tex}
 	
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%References%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

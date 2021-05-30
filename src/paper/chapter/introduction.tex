@@ -1,19 +1,75 @@
-\begin{itemize}
-	\item Big picture: Accident of birth, skill gaps open up early, parental investments play a great role, input to production function. D/Z have studied parenting styles.
-	\item Narrow down + research gap:\\ 
-	Narrow down: For the technology of skill formation it is important to understand what different parenting styles mean for the parent-child interaction and how this translates into human capital formation.\\
-	Resarch gap: \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019} derive parenting styles from developmental psychology (cite Baumrind), not from empirics. There is the Q whether this is granular enough, and also whether this characterization captures the relevant dimensions for, say, the technology of skills formation. Can this characterization also be found in the data? Also their context is cross-country, but within-country inequality in outcomes prob. also related to parenting style.  
-	\item This paper: I'm the first to study this in a data-driven manner without imposing a certain characterizations of parenting styles from theory. To this end, I employ Gaussian Mixture Modelling to distinguish different parenting styles based on survey data capturing many different facets of the parent-child interaction. Information criteria indicate that three classes best fit the data. I investigate the classification's result more throughly and contrast it with the styles identified in \textcite{doepkeParentingStyleAltruism2017}. While some dimensions line-up well, others are counterintuitive which is why labelling is difficult / one has to be cautious.
-	\item Data: Panel Dataset, first interview when ... old, allows me to investigate the parent-child relationship very early on. has videotapes measures 
-	\item EMpirical strategy: density estimation technique, has good properties, comes with characterization (means), uncertainties, estimated via E-M. Furthermore TOshed light on parent-child interactions, I use measures derived from videotaped play-interaction using MLOGIT
-	\item results:
-	\begin{enumerate}
-		\item 3 classes best fit data
-		\item In some dimensions the classes line-up well the ones from baumrind / D/Z, some counterintuitive findings
-		\item  I find little evidence of significant differences in parent-child interaction behavior using MLOGIT, also SES variables do not predict too much
-		\item Differences in testscores unrelated to differences in parenting styles. 
-		\item classification predicts time_invest well, lining up well with the fact that siblings_at_birth (look how it is coded) is the onnly SES var predicting parenting style, indicates  that classification happened along time_investment variable, a thing I want to tackle in the next version of this.
-	\end{enumerate} 
-	\item COntrib 1: Atheoretic, data-driven classification of PS, using ML in econ. So far only survey items used to manually classify p.s., sometimes only one item. Rare exception is Rauh/Renee.
-	\item COntrib 2: How do these relate to interaction behaviors early in children’s up-bringing (the most crucial period for skill formation)
-\end{itemize}
+Early childhood investments are paramount to children's skill formation. Cognitive and noncognitive skills, in turn, predict a wide range of important adult outcomes such as labor market success, health behaviors, and crime \parencites[e.g.][]{heckmanEffectsCognitiveNoncognitive2006}{almlundPersonalityPsychologyEconomics2011}. Parental investments capture one important dimension of the early childhood environment and have been shown to be a key input in children's skill acquisition process \parencites[e.g.][]{falkSocioEconomicStatusInequalities2021}{attanasioEstimatingProductionFunction2020}. Beyond mere investments, recent literature emphasizes that parents choose a set of behaviors (\textit{parenting styles}) subject to constraints which describe different strategies parents may adopt in raising their children \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019}. The literature has adopted a classification derived from developmental psychology \parencite{baumrindChildCarePractices1967}, which identifies three distinct parenting styles: While authoritative (AV) parents try to mold the child's preferences, an authoritarian (AR) style involves restricting the child's choice set. Finally, permissive (PE) parents grant more freedom to their children and do not interfere with their choices. Whilst this theory-based classification\footnote{These 3 parenting styles emerge as equilibrium outcomes in their model.} is able to explain historical trends in parenting styles across countries, it remains unclear whether it provides an accurate reflection of actual parenting behaviors. For example, the underlying model ignores marriage and fertility choices that might additionally affect the choice of parenting styles. As noted by \textcite{beckerTreatiseFamily1981}, fertility choices involve a quantity-quality trade-off since a larger number of children tends to be associated with 
+lower levels of investment in each individual child. Depending on family structucture, this trade-off might be reinforced or attenuated in the case of single-parenting or if both biological parents live in the same household, respectively. Furthermore, a meaningful characterization of within-country differences in parenting styles might require a more granular classification.
+
+This paper uses an unsupervised machine learning algorithm to classify parenting styles using detailed survey data capturing many dimensions of the parent-child relationship. I find that three classes best fit the data based on a Gaussian mixture model \parencite[e.g.][]{hastieElementsStatisticalLearning2009}. Labeling them is difficult since several of the classes' estimated characteristics line-up well with the theoretical predictions from \textcite{doepkeEconomicsParenting2019} while others contradict them. To shed more light on the classifications' properties, I investigate whether the different classes are associated with differences in parent-child interactions, socio-economic status (SES), and child (non)cognitive skills. Surprisingly, I do not find significant differences for both outcomes. The results indicate that the classification is confounded by the number of siblings there had been already when the surveyed child was born.
+
+%DATA + Empirical Strategy: To provide a data-driven classification of parenting styles, I rely on survey measures capturing different aspects of the parent-child relationship. Parents report how often .... Then more about classification Algorithm? density estimation technique, has good properties, comes with characterization (means), uncertainties, estimated via E-M. Mention videotaping here?!
+
+%Results: say tgat 3 ckases max BIC, give examples for (counter)intuitive results,  
+
+%My contrib is rather that I test D/Z directly.NOt that I use an unsupervised technique
+The contribution of this paper is to advance the knowledge about parenting styles by providing a data-driven classification which is then used to characterize the classes in detail. Similar to my approach, many empirical studies that exploit data on the parent-child relationship use dimension reduction methods such as principal component analysis, exploratory factor analysis, or latent Dirichlet analysis to extract linear combinations of the underlying items (\cite{ermischOriginsSocialImmobility2008, chanParentingStyleYouth2011, fioriniHowAllocationChildren2014, bonoEarlyMaternalTime2016, cobb-clarkParentingStyleInvestment2019, zumbuehlParentalInvolvementIntergenerational2020, rauhParentingTypes2020}). Most of them, however, use their results as inputs to the analysis of children's technology of skill formation whereas I focus on the classification itself and what can go wrong if we just interpret it. To the best of my knowledge, there are only two studies that focus on the classification itself \parencites{chanParentingStyleYouth2011}{rauhParentingTypes2020}.
+
+The remainder of the paper is organized as follows. Section \ref{sec:data} provides background information on data source I'm using and how I construct the estimation sample from it. Information about the classification algorithm and its results are provided in section \ref{sec:classifying}. Section \ref{sec:validation} validates the classifications' results and discusses potential confounders. Section \ref{sec:conclusion} concludes.
+% Del Bono et al use PCA on maternal time investment items
+% D/Z/S classify ba hand based on two items
+
+
+%
+%Only later I guess. Broadly speaking, parenting styles constitute a mode of conflict resolution between parents and children: Parental altruism and paternalism govern the degree to which parents care about the children's utility Both parents and children maximize their own utilities DEscribe AV, AR, PE here?! So far, parenting behaviors are classified into three distinct parenting styles 
+%
+%Yet 
+%
+%More recently, not only time investments and their productivit, but rather bahvioral characterizations that go beyond: parenting styles \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019}
+%
+%
+%
+%
+%
+%Attnasio et al 2020: We then estimate
+%the production functions for cognitive and socio-emotional skills.
+%The effects of the program can be explained by increases in parental
+%investments, emphasizing the importance of parenting interventions
+%at an early age
+%
+%Del Bono et al: We find that maternal time
+%is a quantitatively important determinant of skill formation and that its effect declines with child age.
+%There is evidence of long-term effects of early maternal time inputs on later outcomes, especially in
+%the case of cognitive skill development. In the case of non-cognitive development, the evidence of
+%this long-term impact disappears when we account for skill persistence.
+%
+%Deckers et al: To understand the underlying mechanisms, we propose a framework
+%of how SES, parental investments, as well as maternal IQ and preferences influence
+%a child’s IQ and preferences. Our results indicate that disparities in the level of
+%parental investments hold substantial importance.
+%
+%
+%
+%Ermisch: differences by parents’ income group in cognitive and
+%behavioural development emerge by the child’s third birthday. It shows that an important part of these differences can be accounted for by ‘what parents do’ in terms of educational activities and parenting style.
+%
+%
+%
+%
+%\begin{itemize}
+%	\item Big picture: Accident of birth, skill gaps open up early, parental investments play a great role since wages reflect return to human capital, input to production function. D/Z have studied parenting styles.
+%	\item Narrow down + research gap:\\ 
+%	Narrow down: THERE IS FOCUS ON PARENTING STYLES, not only time and productivity of investments!!!!
+%	For the technology of skill formation it is important to understand what different parenting styles mean for the parent-child interaction and how this translates into human capital formation.\\
+%	Resarch gap: \parencites{doepkeParentingStyleAltruism2017}{doepkeEconomicsParenting2019} derive parenting styles from developmental psychology (cite Baumrind), not from empirics. There is the Q whether this is granular enough, and also whether this characterization captures the relevant dimensions for, say, the technology of skills formation. Can this characterization also be found in the data? Also their context is cross-country, but within-country inequality in outcomes prob. also related to parenting style. Within-country, economic conditions are fixed, but what determines parenting style there: number of children it seems. Degree of paternalism and parenting skills for their model. 
+%	\item This paper: I'm the first to study this in a data-driven manner without imposing a certain characterizations of parenting styles from theory. To this end, I employ Gaussian Mixture Modelling to distinguish different parenting styles based on survey data capturing many different facets of the parent-child interaction. Information criteria indicate that three classes best fit the data. I investigate the classification's result more throughly and contrast it with the styles identified in \textcite{doepkeParentingStyleAltruism2017}. While some dimensions line-up well, others are counterintuitive which is why labelling is difficult / one has to be cautious.
+%	\item Data: Panel Dataset, first interview when ... old, allows me to investigate the parent-child relationship very early on. has videotapes measures 
+%	\item EMpirical strategy: density estimation technique, has good properties, comes with characterization (means), uncertainties, estimated via E-M. Furthermore TOshed light on parent-child interactions, I use measures derived from videotaped play-interaction using MLOGIT
+%	\item results:
+%	\begin{enumerate}
+%		\item 3 classes best fit data
+%		\item In some dimensions the classes line-up well the ones from baumrind / D/Z, some counterintuitive findings
+%		\item  I find little evidence of significant differences in parent-child interaction behavior using MLOGIT, also SES variables do not predict too much
+%		\item Differences in testscores unrelated to differences in parenting styles. 
+%		\item classification predicts time invest well, lining up well with the fact that siblings at birth (look how it is coded) is the only SES var predicting parenting style, indicates  that classification happened along time investment variable, a thing I want to tackle in the next version of this.
+%	\end{enumerate} 
+%	\item COntrib 1: Atheoretic, data-driven classification of PS, using ML in econ. So far only survey items used to manually classify p.s., sometimes only one item. Rare exception is Rauh/Renee. Generally contributed to lit in the economics of parenting (Becker 1981; DZ; DZS). DZ propose a model for the choice of PS in which parents care about their child's welfare in addition to their own utility. This altruism conflicts with parental paternalism that makes parents evaluate the children's action differently than according to the child's own preferences. Good examples: time, risk preference. Parenting styles are modes of resolving that conflict. They therefore describe whether and how parents interfere with children's choices. DZS model adds the technology of skill formation to it (as a constraint; Cunha et al. 2010) and the choice of neighborhoods (matter for peer effects). WHen to explain what AR, AV, PE mean (see p.61 in D/Z/S how to do it.)? Trade-off among styles? AV, AR both costly and may lower welfare of the child -> depends on parental paternalism. Theoretical prediction of D/Z/S for a low unequality society characterized by a low retrn to education. Low-paternalism parent will be permissive, very paternalisitic parents either AR or AV, where the more (parenting) skilled, the more AV. In a high inequality society, more AV, less PE, strong socio-economic sorting in PS, AV conducive to econ success. Footnote, inequality affects choice PE vs. AV, but other factors, such as return to incumbency affect AR, but irrelevant for GERMAN setting!
+%	\item COntrib 2: How do these relate to interaction behaviors early in children’s up-bringing (the most crucial period for skill formation), and what are the consequences for skill formation?\\
+%	THe latter lit starts with Becker/Tomes (1979, 1986) who consider the role of family influences during childhood (endowments vs investment) for intergenerational mobility. Lit afterwards (Heckman) postulates production functions and wants to pwin down the fuctional form. I treat parenting Style as just another input, holding constant socio-economics variables. Overviews by attanasio, heckman/Mosso. Up to 4 years of age seems to be especially crucial (H/M), skill gaps open up early. \\
+%	I guess I dont want to open up the lit on importance of household and fmily characteristics in shaping child development (see /DZ/S, p . 73 in that case)
+%\end{itemize}

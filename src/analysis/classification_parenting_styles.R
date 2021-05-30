@@ -7,6 +7,7 @@ library(hrbrthemes)
 library(mclust)
 library(factoextra)
 library(ggpubr)
+library(xtable)
 
 
 # Paths for datasets.
@@ -89,7 +90,7 @@ mean_class_df <- data.table(
   setnames(
     .,
     old = c("item", "mean_cl_1", "mean_cl_2", "mean_cl_3"),
-    new = c("variable", "Mean: AV", "Mean: AR", "Mean: PE")
+    new = c("variable", "AV", "AR", "PE")
   )
 # Should be able to export this using xtable.
 cols_ps <- names(df_p_ps)[-1]
@@ -168,17 +169,17 @@ ib_ar_pe <- df_ib_ca %>%
 p_ib_av_ar <- ib_av_ar %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AV vs. AR)"))
+  setnames(., old = c("value"), new = c("AV/AR"))
 
 p_ib_av_pe <- ib_av_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AV vs. PE)"))
+  setnames(., old = c("value"), new = c("AV/PE"))
 
 p_ib_ar_pe <- ib_ar_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AR vs. PE)"))
+  setnames(., old = c("value"), new = c("AR/PE"))
 
 
 p_ib <- merge.data.table(
@@ -215,17 +216,17 @@ cols_ps <- names(df_p_ps)[-1]
 p_ps_av_ar <- ib_av_ar %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AV vs. AR)"))
+  setnames(., old = c("value"), new = c("AV/AR"))
 
 p_ps_av_pe <- ib_av_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AV vs. PE)"))
+  setnames(., old = c("value"), new = c("AV/PE"))
 
 p_ps_ar_pe <- ib_ar_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("p (AR vs. PE)"))
+  setnames(., old = c("value"), new = c("AR/PE"))
 
 p_ps <- merge.data.table(
   x = p_ps_av_ar, y = p_ps_av_pe, by = "variable"
@@ -237,15 +238,31 @@ ps_mean_pval <- p_ps %>%
   .[, (cols) := lapply(.SD, round, 3), .SDcols = cols] %>%
   merge.data.table(
     x = mean_class_df, y = ., by = "variable"
-  )
+  ) %>%
+  setnames(., old = c("variable"), new = c("Dimension"))
 
-df_n <- df_ib_ca[, by = "class_lab", lapply(.SD, mean, na.rm = T), .SDcols = "siblings_at_birth"]
+ps_mean_pval$Dimension <- c(
+  "Powerful enforcement", "Emotional warmth", "Inconsistent parent.",
+  "Neg. communication", "Monitoring", "Autonomy", "Pos. parent. behavior",
+  "Psychological control"
+)
 
+xtab <- xtable(
+  ps_mean_pval,
+  type = "latex", digits = c(3), align = c("l", rep("c", 7))
+)
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- c("\\hline \\hline\\\\[-1.8ex] \n &    &    &    &\\multicolumn{3}{c}{p-values} \\\\ \n \\cline{5-7} \\\\[-1.8ex]")
+print(
+  xtab,
+      file = str_c(path_out_analysis, "mean_class_dim.tex", sep = "/"),
+      sanitize.text.function = function(x) {
+        x
+      }, include.rownames = FALSE, add.to.row = addtorow,
+      hline.after = c(0, nrow(xtab)), booktabs = TRUE
+)
 
-
-
-
-str(df_ib_ca$class_lab)
 
 
 

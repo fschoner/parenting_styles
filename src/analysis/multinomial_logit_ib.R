@@ -8,6 +8,7 @@ library(mlogit)
 library(nnet)
 library(haven)
 library(sandwich)
+library(modelsummary)
 # Paths for datasets.
 path_in_data <- "src/original_data/"
 path_out_data <- "bld/out/data/"
@@ -30,6 +31,7 @@ fmla_p_ib <- as.formula(
 )
 mlogit <- multinom(fmla_p_ib, data = df)
 #summary(mlogit)
+modelsummary(mlogit, group = model ~ term, stars = TRUE)
 
 z <- summary(mlogit)$coefficients/summary(mlogit)$standard.errors
 z
@@ -54,6 +56,8 @@ fmla_ses <- as.formula(
 )
 
 mlogit_ses <- multinom(fmla_ses, data = df)
+modelsummary(mlogit_ses, group = model ~ term, stars = TRUE, statistic = NULL)
+
 #summary(mlogit)
 
 z <- summary(mlogit_ses)$coefficients/summary(mlogit_ses)$standard.errors

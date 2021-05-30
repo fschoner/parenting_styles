@@ -1,14 +1,31 @@
-I use the self-reported items capturing different dimensions of parenting behavior to come up with a classification of different parenting styles in an unsupervised manner using Gaussian Mixture Modelling
+I use the self-reported items (explained in sec 2) capturing different dimensions of parenting behavior to come up with a classification of different parenting styles in an unsupervised manner using Gaussian mixture modelling.
 
-\subsection{GMM}
-\begin{itemize}
-	\item Density estimation, fits a mixture of densities (w/ different mean vectors and variance-covariance matrices) to the data
-	\item Most popular to use normal densities.
-	\item Using EM-algorithm, it chooses the optimal number of densities according to some information criterion
-	and estimates their means and vcovs 
-	\item Derive classification from this procedure by plugging in an observation's x-vector an picking the density where the density value is maximized for the input vector. This directly gives an uncertainty measure since this can be computed for the other estimated densities, too. 
-	\item Use the mean vectors to interpret differences across classes.
-\end{itemize}
+\subsection{Gaussian Mixture Model}
+I model the scores derived from self-reported survey items on parenting styles as a Gaussian Mixture Model. Strictly speaking, the Gaussian mixture model (GMM) is a density estimation technique. Crucially, however, it can deal with high-dimensional data and classifies data.\footnote{
+	This section borrows heavily from \textcite{hastieElementsStatisticalLearning2009}, chapters 6 and 8.
+} 
+
+Let $x \in \mathbb{R}^p$ denote the vector of scores on the parenting styles items and denote by $f: \mathbb{R}^p \longrightarrow \mathbb{R}_{+}$ its density.\footnote{
+	$p=8$.
+} Let $i = 1,\ldots,N$ denote the observations. The GMM postulates that 
+\begin{equation}
+	f(x) = \sum_{m=1}^{M} \alpha_m \phi(x; \mu_m, \bm{\Sigma}_m),
+\end{equation}
+where $\alpha_m$ are weights (or mixing proportions) that sum to 1, and $\phi$ ist the multivariate normal density with mean vector $\mu$ and variance-covariance matrix $\bm{\Sigma}$. In other words, the density of $x$ is assumed to be represented by a mixture of densities which are allowed to have different weights. Mixtures tend to outperform off-the-shelf density estimation if greater flexibility is needed, such as when the data is multimodal.
+Furthermore, and more importantly for my application, the GMM provides estimates of the probability that an observations belongs to class $m$. Observation $i$ is then assigned to the class with the highest probability, denoted by $\widehat{\delta_i}$. To see this, note that the estimation results contain $\widehat{\mu}_m$, $\widehat{\bm{\Sigma}}_m$, and $\widehat{\alpha}_m$ for classes $m = 1,\ldots, M$. Then,
+\begin{equation*}
+	\widehat{\delta}_i = \max_{1 \leqslant m \leqslant M} \widehat{\text{Pr}}(i \in m) = \frac{\widehat{\alpha}_m \phi(x_i; \widehat{\mu}_m, \widehat{\bm{\Sigma}}_m)}{\sum_{k=1}^{M} \widehat{\alpha}_k \phi(x_i; \widehat{\mu}_k, \widehat{\bm{\Sigma}}_k)}
+\end{equation*}
+Estimation is conducted using the Expectation-Maximization algorithm.
+%\begin{itemize}
+%	\item Density estimation, fits a mixture of densities (w/ different mean vectors and variance-covariance matrices) to the data
+%	\item Most popular to use normal densities.
+%	\item Using EM-algorithm, it chooses the optimal number of densities according to some information criterion
+%	and estimates their means and vcovs 
+%	\item Derive classification from this procedure by plugging in an observation's x-vector an picking the density where the density value is maximized for the input vector. This directly gives an uncertainty measure since this can be computed for the other estimated densities, too. 
+%	\item Use the mean vectors to interpret differences across classes.
+%	\item better than PCA and EFA because they give probabilities and uncertainties.
+%\end{itemize}
 
 \subsection{Results}
 \begin{itemize}
@@ -19,6 +36,7 @@ I use the self-reported items capturing different dimensions of parenting behavi
 	\item Although inconclusive, seems to pick up sth, see density plot.
 	\item Argue along D/Z that powerful enforcement super important, and which else? And explain own labels along these lines.
 \end{itemize}
+\input{../../bld/out/analysis/mean_class_dim}
 
 \subsection{Validation}
 \begin{itemize}

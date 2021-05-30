@@ -62,7 +62,7 @@ df_summ <- df %>%
   )
 
 
-pa <- data.frame("A. Child Characteristics", "", "", "", "", "", "", "")
+#pa <- data.frame("A. Child Characteristics", "", "", "", "", "", "")
 #attr(pa, which = "position") <- 1
 pb <- data.frame("B. Family Structure", "", "", "", "", "", "", "")
 #attr(pb, which = "position") <- 4
@@ -74,7 +74,8 @@ pc <- data.frame("C. Household Characteristics", "", "", "", "", "", "", "")
 datasummary_balance(~ SES,
                     data = df_summ, 
                     fmt = 3, dinm_statistic = "p.value",
-                    #add_rows = rbindlist(pa, pb, pc),
+                    #add_rows = pa,
+                    align = c("l", rep("c", 6)),
                     output = str_c(path_out_analysis, "summ_stats_ses.tex")
                     )
 datasummary_balance(~ SES,
