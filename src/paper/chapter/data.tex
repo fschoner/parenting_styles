@@ -1,45 +1,89 @@
-Data used in this study is drawn from the... check NEPS-Website what to write here (panel, early childhood development, early on, (non) cognitive skill measures). I do not exploit the panel dimension and use it as a cross section. SAMPLE SIZE, waves and age of the children.
+Data used in this study is drawn from the newborn cohort of the German National Educational Panel Study \parencite[NEPS][]{neps}. The newborn cohort is a representative longitudinal dataset on 3481 children born between February and June 2012 in Germany. The survey instruments focus on the children's education and competence development and are conducted with both children and parents as target persons. Children are 6, 16, 25, 37 months old in the first four waves of the survey, respectively. Afterwards, parents and children are interviewed once a year up until the most recent wave where children are seven years old. 
+
+I exploit information on parenting styles and measures of the socio-economic status of the household reported by parents, measures of parent-child interaction behaviors rated by interviewers, and measures of children's noncognitive skills. I collapse the panel dataset to a cross-section for two reasons. First, many variables of interest are only asked once (measures of parenting styles and most variables on the socio-economic environment, and most competence measures). If they are elicited repeatedly, I average the responses at the individual level to reduce measurement error. Second, the algorithm I use to classify parenting styles assumes independent and identically distributed observations, an assumption which is not defendable for panel data.
+% many parental and child behaviors are age-dependent and are not easily comparable across waves.
+
+\textit{Parenting Styles}: Measures of various parenting practices are elicited from parents in waves five to eight. Parents are asked how often certain things occur between them and their child. Answers are given on five-point Likert scales ranging from 1-``never'' to 5-``very often''. The dimensions elicited read ``powerful enforcement'', ``emotional warmth'', ``inconsistent parenting'', ``negative communication'', ``monitoring'', ``autonomy'', ``positive parenting behavior'', and ``psychological control''. Given that parenting practices are related to the child's age, I de-mean the scores of the items using wave-specific means if measures are elicited repeatedly. Each dimension consists of three to four sub-items whose scores I average at the individual level. I drop observations for whom at least one of the dimensions is not available. This leaves me with 1504 observations whose scores are directly fed into the classification algorithm explained in \ref{sec:classifying}.
+
+Table \ref{tab:summ_stats} show summary statistics stratified by the household's socio-economic status (SES). I consider households to be low-SES if their number of books at home is below 100.\footnote{
+This measure for the socio-eocnomic environment of children is used quite frequently in the literature. See, e.g., \textcite{resnjanskij et al} for a recent example.
+} The low number low-SES families in my core sample is driven by non-random attrition in the sense that low-SES families drop out of the sample more frequently than high-SES families. Children in high-SES households are less often from a migrant background and have more siblings at birth. Furthermore, parents in high-SES households are more often married, better educated, less often unemployed prior to birth, older at birth, richer, and spend more time with their children. In terms of test scores, high-SES children outperform low-SES children in both numerical and verbal tests.
+
+\begin{table}[!htbp]
+	\centering
+	\begin{threeparttable}
+		\caption{Summary Statistics}
+		\label{tab:summ_stats}
+		\begin{tabular}[t]{lcccccc}
+			\hline\hline\\[-1.8ex] 
+			\multicolumn{1}{c}{ } & \multicolumn{2}{c}{High (N=1032)} & \multicolumn{2}{c}{Low (N=395)} & \multicolumn{1}{c}{    } & \multicolumn{1}{c}{    } \\
+			\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
+			& Mean & Std. Dev. & Mean  & Std. Dev.  & Diff. in Means & p\\
+			\midrule
+			A. Child characteristics &&&&&&           \\
+			\hspace{4mm}Female & 0.495 & 0.500 & 0.491 & 0.501 & -0.004 & 0.892\\
+			\hspace{4mm}Migration Background & 0.316 & 0.463 & 0.462 & 0.499 & 0.146 & 0.000\\
+			\hspace{4mm}Siblings (birth) & 0.736 & 0.871 & 0.653 & 0.903 & -0.083 & 0.116\\
+			B. Household characteristics &&&&&&           \\
+			\hspace{4mm}Married & 0.803 & 0.349 & 0.705 & 0.404 & -0.099 & 0.000\\
+			\hspace{4mm}High School Degree & 0.784 & 0.412 & 0.333 & 0.472 & -0.450 & 0.000\\
+			%\hspace{4mm}%Univ. Degree & 0.234 & 0.283 & 0.050 & 0.152 & -0.184 & 0.000\\
+			\hspace{4mm}Unemployed & 0.199 & 0.398 & 0.233 & 0.423 & 0.034 & 0.174\\
+			\hspace{4mm}Mother's age & 33.663 & 4.271 & 31.312 & 5.022 & -2.350 & 0.000\\
+			%\hspace{4mm}%Father's age & 36.432 & 5.442 & 33.708 & 5.817 & -2.723 & 0.000\\
+			\hspace{4mm}Net household income & 0.162 & 1.084 & -0.404 & 0.617 & -0.567 & 0.000\\
+			\hspace{4mm}Time investment & 0.080 & 0.978 & -0.236 & 1.037 & -0.316 & 0.000\\
+			%\hspace{4mm}%Sensitivity (P) & 3.946 & 0.568 & 3.690 & 0.651 & -0.256 & 0.000\\
+			%\hspace{4mm}%Intrusiveness (P) & 1.677 & 0.529 & 1.864 & 0.645 & 0.187 & 0.000\\
+			%\hspace{4mm}%Detachment (P) & 1.098 & 0.242 & 1.122 & 0.284 & 0.024 & 0.185\\
+			%\hspace{4mm}%Stimulation (P) & 3.086 & 0.652 & 2.912 & 0.713 & -0.174 & 0.000\\
+			%\hspace{4mm}%Pos. Regard (P) & 3.446 & 0.671 & 3.242 & 0.724 & -0.204 & 0.000\\
+			%\hspace{4mm}%Neg. Regard (P) & 1.079 & 0.220 & 1.133 & 0.288 & 0.054 & 0.002\\
+			%\hspace{4mm}%Emotionality (P) & 3.232 & 0.770 & 2.998 & 0.837 & -0.234 & 0.000\\
+			%\hspace{4mm}%Pos. Mood (C) & 3.148 & 0.564 & 3.076 & 0.531 & -0.072 & 0.039\\
+			%\hspace{4mm}%Neg. Mood (C) & 1.433 & 0.524 & 1.464 & 0.595 & 0.031 & 0.407\\
+			%\hspace{4mm}%Activity (C) & 2.432 & 0.666 & 2.374 & 0.662 & -0.058 & 0.179\\
+			%\hspace{4mm}%Attention (C) & 3.305 & 0.552 & 3.202 & 0.629 & -0.104 & 0.009\\
+			%\hspace{4mm}%Pos. Engagement (C) & 3.401 & 0.562 & 3.241 & 0.572 & -0.160 & 0.000\\
+			%\hspace{4mm}%Interact. Qual. (P) & 0.114 & 0.956 & -0.282 & 1.053 & -0.396 & 0.000\\
+			C. Test scores &&&&&&           \\
+			\hspace{4mm}SON-R & 0.492 & 2.440 & -0.215 & 2.447 & -0.707 & 0.000\\
+			\hspace{4mm}Vocabulary & 0.140 & 0.978 & -0.332 & 0.955 & -0.471 & 0.000\\
+			\hspace{4mm}Del. Gratification & 0.003 & 0.812 & 0.022 & 0.814 & 0.019 & 0.692\\
+			\hline\hline
+		\end{tabular}
+	\begin{tablenotes}
+		\small
+		\item \textit{Notes}: Summary statistics of $N = 1504$ observations stratified by SES. P-values for $t$-tests on equality of means against a two-sided alternative. Female is a dummy indicating whether a child's sex is female. Migration Background is a dummy indicating whether the child has any migration background. Siblings (birth) is the number of siblings born prior to the surveyed child's birth. Married is a dummy indicating whether the respondent is married. Unemployed is a dummy indicating whether the respondent was unemployed one year prior to child birth. Time investment is generated as the sum of a range of items capturing the frequency of parent-child activities in the household and standardized to have mean zero and standard deviation of one. INDICATE standarized with star and std. SON.R. SON-R is the score on the SON-R nonverbal intelligence test conducted in wave 4. Vocabulary is the sum of correct items in a vocabulary test. Del. Gratification is the waiting time of a child in a classical marshmallow test.
+	\end{tablenotes}
+	\end{threeparttable}
+\end{table}
 
 
-\subsection{Parenting styles items}
-\begin{itemize}
-	\item Directly fed into the classification exercise.
-	\item How often dothe following things occur b/w you and your child?
-	\item Likert scales
-	\item age-adjusted
-	\item single survey-items reduced to measures by taking rowMeans
-	\item asked in later waves, individual mean if asked twice
-	\item reduces sample size substantially.
-	\item Point out here which are especially useful for the p.s. classification (see ECMA)
-	\begin{enumerate}
-		\item POWERFUL ENFORCEMENT directly speaks to how often a child's choice set is restricted.
-		
-	\end{enumerate}
-\end{itemize}
 
-\subsection{Interaction behaviors}
-\begin{itemize}
-	\item play situation, recorded, coded by trained professionals.
-	\item scale (in)appropriate
-	\item Both parent's and child's behavior rated.
-\end{itemize}
-
-\subsection{SES}
-\subsection{(Non)cognitive skills}
-\begin{itemize}
-	\item SON-R (quant)
-	\item vocab (verbal)
-	\item patience: delayed gratification
-	\item standardized to have mean zero and s.d. 1
-\end{itemize}
-
-\subsection{Summary Statistics}
-\begin{itemize}
-	\item Privileged sample
-	\item Attrition (check this)
-\end{itemize}
+%\subsection{Interaction behaviors}
+%\begin{itemize}
+%	\item play situation, recorded, coded by trained professionals.
+%	\item scale (in)appropriate
+%	\item Both parent's and child's behavior rated.
+%\end{itemize}
+%
+%\subsection{SES}
+%\subsection{(Non)cognitive skills}
+%\begin{itemize}
+%	\item SON-R (quant)
+%	\item vocab (verbal)
+%	\item patience: delayed gratification
+%	\item standardized to have mean zero and s.d. 1
+%\end{itemize}
+%
+%\subsection{Summary Statistics}
+%\begin{itemize}
+%	\item Privileged sample
+%	\item Attrition (check this)
+%\end{itemize}
 
 Would be great to have attrition summary stats (for the appendix.). SES-variables (means) by waves. Waves on thevertical, variable means horizontally.
 
-\input{../../bld/out/analysis/summ_stats_ses}
+
 How to interpret intrusiveness scale?!

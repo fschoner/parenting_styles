@@ -249,11 +249,13 @@ ps_mean_pval$Dimension <- c(
 
 xtab <- xtable(
   ps_mean_pval,
-  type = "latex", digits = c(3), align = c("l", rep("c", 7))
+  type = "latex", digits = c(3), align = c(rep("l", 2), rep("c", 6))
 )
 addtorow <- list()
-addtorow$pos <- list(-1)
-addtorow$command <- c("\\hline \\hline\\\\[-1.8ex] \n &    &    &    &\\multicolumn{3}{c}{p-values} \\\\ \n \\cline{5-7} \\\\[-1.8ex]")
+addtorow$pos <- list(-1, 8)
+addtorow$command <- c(
+  "\\hline \\hline\\\\[-1.8ex] \n &    &    &    &\\multicolumn{3}{c}{p-values} \\\\ \n \\cline{5-7} \\\\[-1.8ex]",
+    "\\hline")
 print(
   xtab,
       file = str_c(path_out_analysis, "mean_class_dim.tex", sep = "/"),

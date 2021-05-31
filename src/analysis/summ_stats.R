@@ -21,53 +21,50 @@ df_summ <- df %>%
   ) %>%
   select(
     Female = fem_child,
-    `Migration Background` = migback,
+    `Migration background` = migback,
     # Family structure
-    `Siblings (birth)` = siblings_at_birth,
+    `Siblings` = siblings_at_birth,
     `Married` = married,
     # Parents
-    `High School Degree` = both_p_abi,
-    `Univ. Degree` = both_p_univ_deg,
+    `High School` = both_p_abi,
+    #`Univ. Degree` = both_p_univ_deg,
     `Unemployed` = unemp,
     `Mother's age` = age_mom,
-    `Father's age` = age_dad,
-    `Net household income` = net_hh_inc,
+    #`Father's age` = age_dad,
+    `Income` = net_hh_inc,
     #`Parenting Style` = class_lab,
     SES,
-    `Time Invest.` = time_invest,
+    `Time investment` = time_invest,
     # Parenting Styles: not include
     # Interaction behaviors
-    `Sensitivity (P)` = sens_n_stress_p_ib,
-    `Intrusiveness (P)` = intrusiveness_p_ib,
-    `Detachment (P)` = detachment_p_ib,
-    `Stimulation (P)` = stimulation_p_ib,
-    `Pos. Regard (P)` = pos_regard_p_ib,
-    `Neg. Regard (P)` = neg_regard_p_ib,
-    `Emotionality (P)` = emotionality_p_ib,
-    # Child
-    `Pos. Mood (C)` = pos_mood_c_ib,
-    `Neg. Mood (C)` = neg_mood_c_ib,
-    `Activity (C)` = activity_lvl_c_ib,
-    `Attention (C)`= ns_sust_att_c_ib,
-    `Pos. Engagement (C)` = pos_engage_c_ib,
+    `Sensitivity ` = sens_n_stress_p_ib,
+    `Intrusiveness ` = intrusiveness_p_ib,
+    `Detachment ` = detachment_p_ib,
+    `Stimulation ` = stimulation_p_ib,
+    `Pos. Regard ` = pos_regard_p_ib,
+    `Neg. Regard ` = neg_regard_p_ib,
+    `Emotionality ` = emotionality_p_ib,
     # Summary Measure
-    `Interact. Qual. (P)` = qib_m,
+    `Interact. Qual. ` = qib_m
     
+    # Child
+    #`Pos. Mood (C)` = pos_mood_c_ib,
+    #`Neg. Mood (C)` = neg_mood_c_ib,
+    #`Activity (C)` = activity_lvl_c_ib,
+    #`Attention (C)`= ns_sust_att_c_ib,
+    #`Pos. Engagement (C)` = pos_engage_c_ib,
     
     # Skills
-    `SON-R` = can4_sc1,
-    `Vocabulary` = voc_sum,
-    `Del. Gratification` = dg_waiting_time
+    #`SON-R` = can4_sc1,
+    #`Vocabulary` = voc_sum,
+    #`Del. Gratification` = dg_waiting_time
     
   )
 
 
 #pa <- data.frame("A. Child Characteristics", "", "", "", "", "", "")
 #attr(pa, which = "position") <- 1
-pb <- data.frame("B. Family Structure", "", "", "", "", "", "", "")
-#attr(pb, which = "position") <- 4
-pc <- data.frame("C. Household Characteristics", "", "", "", "", "", "", "")
-#attr(pc, which = "position") <- 7
+
 
 #nrow_df <- rbindlist(list(pa,pb,pc))
 
