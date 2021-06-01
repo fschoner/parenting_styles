@@ -1,15 +1,75 @@
 \subsection{Empirical Strategy}
 The main purpose of this validation exercise is to investigate whether and to what extent differences in the identified parenting styles are associated with differences in (i) the parent-child interaction and (ii) the children's socio-economic environment. I therefore estimate the following Multinomial Logit model
-(see C/T) using maximum likelihood:
+using maximum likelihood \parencite[see][chapter 15]{cameronMicroeconometricsMethodsApplications2005}:
 \begin{equation}
 	\text{Pr}(Y_i = m) = \frac{\exp(\x^\top_{i} \be_m + \z^\top_{i} \bm{\gamma}_m)}{\sum_{l=1}^{3} \exp(\x^\top_{i}\be_l + \z^\top_{i} \bm{\gamma}_l)}, \qquad m = 1, 2, 3, \label{eq:multinom}
 \end{equation}
 where the values of $m$ correspond to the parenting styles AV, AR, and PE, respectively and thereby define $Y_i$. $\x_i$ contains individual-level regressors capturing the parental interaction behavior in various dimensions (interviewer rated parental sensitivity, intrusiveness, detachment, stimulation, positive regard, negative regard, and emotionality when dealing their children), while $\z_i$ captures the child's socio-economic environment (mother's age, a dummy indicating that both parent completed upper secondary school, net household income, a dummy indicating whether the parents are married, SES as measured by books at home, the number of siblings when the surveyed child was born, and a measure of time investment).
 
-Albeit parameter estimates cannot be interpreted causally, they help identify the factors that predict the parenting styles identified though the classification. If the classification captures relevant differences in parenting styles, we expect to see different parental interaction behaviors across classes. For example, authoritarian parents may be more intrusive than other parents while authoritative parents might be stimulating their children more intensively. Similarly, differences in the socio-economic environment such as family structure could differ across parenting styles. According to \textcite{beckerTreatiseFamily1981}, parents probably spend less time with later-born children than with their first-born child.  
+Albeit parameter estimates cannot be interpreted causally, they help identify the factors that predict the parenting styles identified though the classification. Furthermore, they allow ceteris paribus statements in a correlational sense. If the classification captures relevant differences in parenting styles, we expect to see different parental interaction behaviors across classes. For example, authoritarian parents may be more intrusive than other parents while authoritative parents might be stimulating their children more intensively. Similarly, differences in the socio-economic environment such as family structure could differ across parenting styles. According to \textcite{beckerTreatiseFamily1981}, parents probably spend less time with later-born children than with their first-born child.  
 
-\subsection{Results}
-Coefficient estimates from the mmultinomial logit model in ()\ref{eq:multinom}) using the permissive (PE) parenting style as a reference category are shown in table 2.  
+\subsection{Logit estimates}
+Coefficient estimates in terms of relative risk ratios (RRRs) from the multinomial logit model in (\ref{eq:multinom}) using the permissive (PE) parenting style as a reference category are shown in Table \ref{tab:res}.  
+%
+\begin{table}[!htbp]
+	\centering
+	\begin{threeparttable}
+		\caption{Regression Results}
+		\label{tab:res}
+		\begin{tabular}[t]{llccc}
+			\hline \hline \\[-1.8ex]
+			&    &  \multicolumn{2}{c}{Multinomial Logit}\\
+			&    &  \multicolumn{2}{c}{Dependent variable: Parenting style}\\
+			&    & (1) & (2) \\
+			\cline{3-4} \\[-1.8ex]
+			Sensitivity & AR & 0.731** (0.158) & 0.762 (0.165)\\
+			& AV & 0.833 (0.117) & 0.812* (0.121)\\
+			&  &  \vphantom{4} & \\
+			Intrusiveness & AR & 0.812 (0.138) & 0.791 (0.144)\\
+			& AV & 0.817** (0.103) & 0.809** (0.106)\\
+			&  &  \vphantom{3} & \\
+			Detachment & AR & 0.896 (0.107) & 0.920 (0.109)\\
+			& AV & 0.944 (0.075) & 0.940 (0.076)\\
+			&  &  \vphantom{2} & \\
+			Emotionality & AR & 1.397** (0.161) & 1.477** (0.168)\\
+			& AV & 1.036 (0.120) & 1.046 (0.123)\\
+			&  &  \vphantom{1} & \\
+			%Siblings & AR &  & 1.146 (0.207)\\
+			%& AV &  & 1.057 (0.152)\\
+			%&  &  & \\
+			Time investment & AR &  & 2.332*** (0.112)\\
+			& AV &  & 1.516*** (0.078)\\
+			\midrule
+			Further controls &  & No & Yes\\
+			N &  & 1002 & 1002\\
+			\bottomrule
+		\end{tabular}
+		\begin{tablenotes}
+			\small
+			\item \textit{Notes}: 
+		\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+%
+Column (1) solely uses the measures of parental interaction behaviors (see Table \ref{tab:summ_stats}) to predict parenting styles obtained from the classification exercise, while column (2) adds various variables capturing the childs' socio-economic environment.\footnote{
+For the sake of brevity I do not report all coefficient estimates. More specifically, only parental behaviors most obiously related to parenting styles are reported. Second, several variables capturing the socio-economic environment are omitted. See the appendix for the full table.
+} 
+The RRRs for the sensitivity, intrusiveness, and detachment behaviors are smaller than one (albeit often insignificantly so) in columns (1) and (2). For example, the first coefficient in column (1) means that more sensitive parents are less likely to fall in the authoritarian class than into the permissive class. Given that we expect authoritarian parents to be more likely to insist on rules and impose their will on their child, their behavior is, by definition, less tuned to the childs' needs, i.e. less sensitive. Therefore, this result is in line with the classification. However, the second coefficient in column (2) reveals that, simply put, authoritative parents are less sensitive than permissive parents if the child's socio-economic environment is controlled for. There is no ex-ante hypthesis here.
+%
+In addition, both specifications indicate that more intrusive parents are more likely to parent in a permissive than authoritative manner. Since permissive parents are expected to be the least interfering with the child's actions, this finding contradicts the classification. Unfortunately, there are no significant associations between parenting styles and parental detachment. Finally, RRRs for parental emotionality suggest that permissive parents are less likely to be the ones showing appropriate emotions during the play scene as compared to authoritarian parents. This is neither confirms nor contradicts the classification.
 
-\input{../../bld/out/analysis/logit.tex}
-\subsection{SES-variables}
+Including controls for the child's socio-economic environment hardly changes coefficients on parental interaction behaviors. At the same time, they reveal important insights themselves. Keeping interaction behaviors constant, parents who spend more time on highly interactive activities with their children are more likely to fall into the authoritative and authoritarian classes, respectively. Both effects are large in economic terms too. A one standard deviation increase in time investment is associated with an increase in the relative risk of belonging to the authoritarian class as compared to the permissive class by a factor of 2.332.
+
+Two conclusions emerge from the results. First, estimates on the associations between parenting styles and parental interaction behaviors are only partially in line with ex-ante hypotheses. This matches the pattern from the initial classification exercise well when some of the predictions generated from the theoretical model of \textcite{doepkeParentingStyleAltruism2017} were confirmed and others not. Second, the socio-economic environment seems to outperform parental interaction behaviors in terms of predictive power of parenting styles. In particular the amount of time spent on highly interactive parent-child activities seems to matter much more for the classification of parenting styles than actual parental behavior. This point is vividly illustrated in Figure \ref{fig:density}, which shows that this holds for the entire distribution of time investment.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[scale=0.65]{../../bld/out/analysis/time_invest_density.pdf}
+	\caption{Densities of time investment by class of parenting style}
+	\vspace{-0.25cm}
+	%\caption*{\footnotesize \textit{Notes:} This plot shows the 12 largest (in absolute value) non-zero coefficients from regressing relationship quality on activities (equation \ref{eq:pen_reg}) using the Lasso.}  
+	\label{fig:density}  
+\end{figure} 
+
+This has important ramifications for the classification of parenting styles since time investment is correlated with family structure. For example, time investment is negatively correlated with the number of siblings born before the surveyed child ($p < 0.01$). This suggests that family structure confounds latent parenting types in the following sense. As suggested by \textcite{beckerTreatiseFamily1981}, parents face a quantity-versus-quality trade-off when making fertility choices. One example of child quality choice is the amount of time invested into child rearing. As the number of children increases, parents are likely to decrease their time investment. However, this does not change their (latent) parenting style, it merely reduces the time children are exposed to their parenting style. Another possibility is that if the number of children increase, parents get more permissive because the cost of monitoring increases. We could not disentangle this. Could either be that permissive parents would be AV/AR in the case of only one child, or that they truly change. One way to find this out is to only look at parents whose surveyed child is their first-born, b/c D/Z assume that there is only one parent/one child. Outlook.
+

@@ -47,7 +47,13 @@ cor(df_ib_ca$time_invest, df_ib_ca$nc_patience, use = "complete.obs")
 cor(df_ib_ca$time_invest, df_ib_ca$married, use = "complete.obs")
 cor(df_ib_ca$time_invest, df_ib_ca$migback, use = "complete.obs")
 cor(df_ib_ca$time_invest, df_ib_ca$stimulation_p, use = "complete.obs")
-
+cor(df_ib_ca$time_invest, df_ib_ca$siblings_at_birth, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$siblings_at_birth, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$married, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$unemp, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$age_mom, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$univ_deg, use = "complete.obs")
+cor.test(df_ib_ca$time_invest, df_ib_ca$migback, use = "complete.obs")
 
 # Plot pairwise scatterplots
 #pairs(df_p_ps[, -1], lower.panel = NULL)
@@ -103,7 +109,7 @@ df_ib_ca %>%
     lapply(.SD, mean, na.rm = T),
     .SDcols = cols_ps]
 
-t.test(df_ib_ca[class == 1, "power_enforce"], df_ib_ca[class == 2, "power_enforce"])
+#t.test(df_ib_ca[class == 1, "power_enforce"], df_ib_ca[class == 2, "power_enforce"])
 # Find out more about classes
 
 #1) What do they mean for interaction behaviors of parents and other parental
@@ -172,17 +178,17 @@ ib_ar_pe <- df_ib_ca %>%
 p_ib_av_ar <- ib_av_ar %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AV/AR"))
+  setnames(., old = c("value"), new = c("1/2"))
 
 p_ib_av_pe <- ib_av_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AV/PE"))
+  setnames(., old = c("value"), new = c("1/3"))
 
 p_ib_ar_pe <- ib_ar_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = patterns("(p|c)_ib$")] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AR/PE"))
+  setnames(., old = c("value"), new = c("2/3"))
 
 
 p_ib <- merge.data.table(
@@ -219,17 +225,17 @@ cols_ps <- names(df_p_ps)[-1]
 p_ps_av_ar <- ib_av_ar %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AV/AR"))
+  setnames(., old = c("value"), new = c("1/2"))
 
 p_ps_av_pe <- ib_av_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AV/PE"))
+  setnames(., old = c("value"), new = c("1/3"))
 
 p_ps_ar_pe <- ib_ar_pe %>%
   .[, lapply(.SD, function(x) t.test(x ~ class_lab)$p.value), .SDcols = cols_ps] %>%
   melt(.) %>%
-  setnames(., old = c("value"), new = c("AR/PE"))
+  setnames(., old = c("value"), new = c("2/3"))
 
 p_ps <- merge.data.table(
   x = p_ps_av_ar, y = p_ps_av_pe, by = "variable"
@@ -242,7 +248,7 @@ ps_mean_pval <- p_ps %>%
   merge.data.table(
     x = mean_class_df, y = ., by = "variable"
   ) %>%
-  setnames(., old = c("variable"), new = c("Dimension"))
+  setnames(., old = c("variable", "AV", "AR", "PE"), new = c("Dimension", "1", "2", "3"))
 
 ps_mean_pval$Dimension <- c(
   "Powerful enforcement", "Emotional warmth", "Inconsistent parent.",

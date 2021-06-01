@@ -16,12 +16,13 @@ path_out_analysis <- "bld/out/analysis/"
 
 source("src/functions/functions.r")
 
-
+std_col <- c("age_mom", "net_hh_inc")
 
 df <- fread(str_c(path_out_data, "df_class_cs.csv")) %>%
   .[, AV := fifelse(class_lab == "AV", 1, 0)] %>%
   .[, AR := fifelse(class_lab == "AR", 1, 0)] %>%
   .[, SES := fifelse(low_ses_books == 1, 0, 1)] %>%
+  .[, (std_col) := lapply(.SD, function(x) as.vector(scale(x))), .SDcols = std_col] %>%
   as_tibble() %>%
   select(
     Female = fem_child,
@@ -64,7 +65,7 @@ ib_p <- c(
 
 ses <- c(
   "`Mother's age`", "`High school`", "Income", "`High-SES`", "Siblings",
-  "`Time investment`",
+  #"`Time investment`",
   "Married", "`Migration background`"
 )
 ses_wo_ti <- c(
@@ -89,9 +90,9 @@ fmla_ib_ses_zw <- as.formula(
 #mod_zw <- multinom(fmla_ib_ses_zw, data = df)
 #modelsummary(mod_zw, stars = T)
 mdls <- list(
-  "Interact. behav." = multinom(fmla_ib, data = df),
-  "Interact. behav. + SES" = multinom(fmla_ib_ses_zw, data = df),
-  "Interact. behav. + SES + TI" = multinom(fmla_ib_ses, data = df)
+  "(1)" = multinom(fmla_ib, data = df),
+  #"(2)" = multinom(fmla_ib_ses_zw, data = df),
+  "(2)" = multinom(fmla_ib_ses, data = df)
 ) 
 #summary(mlogit_ib_ses)
 #summary(mlogit)
@@ -104,15 +105,35 @@ gm <- tibble::tribble(
   "r.squared", "R<sup>2</sup>", 2
 )
 rows <- tribble(
-  ~term, ~y.level, ~`Interact. behav.`, ~`Interact. behav. + SES`, ~`Interact. behav. + SES + TI`,
-  "", "", "", "", "",
-  "", "", "", "", "",
-  "", "", "", "", "",
-  "", "", "", "", "",
-  "", "", "", "", "",
-  "Further controls?", "", "No", "Yes", "Yes"
+  ~term, ~y.level, ~`(1)`, ~`(2)`,
+  "", "", "", "",
+  "", "", "", "",
+  "", "", "", "",
+  "", "", "", "",
+  "", "", "", "",
+  "Further controls?", "", "No", "Yes"
 )
 attr(rows, 'position') <- c(3, 6, 9, 12, 15, 18)
+
+modelsummary(
+  mdls, stars = TRUE,
+  estimate = "{estimate}{stars} ({std.error})",
+  statistic = NULL,
+  #coef_omit = "(Intercept)|Income|`Mother's age`|`High school`|Married|Pos. Regard|Neg. Regard|`Migration background`|`High-SES`|Detachment",
+  coef_rename = c(
+    "`Pos. Regard`" = "Pos. Regard",
+    "`Neg. Regard`" = "Neg. Regard",
+    "`Time investment`" = "Time investment"
+  ),
+  group = term + y.level ~ model,
+  gof_map = gm,
+  align = c(rep("l", 2), rep("c", 2)),
+  add_rows = rows,
+  #output = str_c(path_out_analysis, "logit.tex"),
+  exponentiate = TRUE
+)
+
+
 modelsummary(
   mdls, stars = TRUE,
   estimate = "{estimate}{stars} ({std.error})",
@@ -123,12 +144,12 @@ modelsummary(
     "`Neg. Regard`" = "Neg. Regard",
     "`Time investment`" = "Time investment"
     ),
-  #values_fn = list(summary(mlogit_ib), summary(mlogit_ib_ses)),
   group = term + y.level ~ model,
   gof_map = gm,
-  align = c("l", rep("l", 4)),
+  align = c(rep("l", 2), rep("c", 2)),
   add_rows = rows,
-  output = str_c(path_out_analysis, "logit.tex")
+  output = str_c(path_out_analysis, "logit.tex"),
+  exponentiate = TRUE
   )
 
 
