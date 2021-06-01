@@ -33,19 +33,19 @@ df_summ <- df %>%
     #`Father's age` = age_dad,
     `Income` = net_hh_inc,
     #`Parenting Style` = class_lab,
-    SES,
-    `Time investment` = time_invest,
+    SES, class_lab,
+    `Time investment*` = "Time investment",
     # Parenting Styles: not include
     # Interaction behaviors
-    `Sensitivity ` = sens_n_stress_p_ib,
-    `Intrusiveness ` = intrusiveness_p_ib,
-    `Detachment ` = detachment_p_ib,
-    `Stimulation ` = stimulation_p_ib,
-    `Pos. Regard ` = pos_regard_p_ib,
-    `Neg. Regard ` = neg_regard_p_ib,
-    `Emotionality ` = emotionality_p_ib,
+    `Sensitivity*` = sens_n_stress_p_ib,
+    `Intrusiveness*` = intrusiveness_p_ib,
+    `Detachment*`  = detachment_p_ib,
+    `Stimulation*` = stimulation_p_ib,
+    `Pos. Regard*` = pos_regard_p_ib,
+    `Neg. Regard*` = neg_regard_p_ib,
+    `Emotionality*` = emotionality_p_ib
     # Summary Measure
-    `Interact. Qual. ` = qib_m
+    #`Interact. Qual. ` = qib_m
     
     # Child
     #`Pos. Mood (C)` = pos_mood_c_ib,
@@ -75,9 +75,9 @@ datasummary_balance(~ SES,
                     align = c("l", rep("c", 6)),
                     output = str_c(path_out_analysis, "summ_stats_ses.tex")
                     )
-datasummary_balance(~ SES,
-                    data = df_summ, 
-                    fmt = 3, dinm_statistic = "p.value")
+#datasummary_balance(~ SES,
+#                    data = df_summ, 
+#                    fmt = 3, dinm_statistic = "p.value")
 
 #rownames(new_rows) <- 1
 

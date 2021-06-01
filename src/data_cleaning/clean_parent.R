@@ -218,7 +218,9 @@ df_parent %>%
     nof_siblings == 0, 0,
     nof_siblings >= 1, 1
   )] %>%
-  .[wave == 1, siblings_at_birth := nof_siblings] %>%
+  .[wave == 1, siblings_at_birth := fcase(
+    nof_siblings >= 1, 1,
+    nof_siblings == 0, 0)] %>%
   .[, `:=` (
     fem_child = fcase(
       fem_child == 1, 1,
@@ -375,7 +377,7 @@ cols_ses <- c(
   "both_p_univ_deg", "age_mom", "age_dad", "siblings_at_birth"
 )
 cols_univ <- str_subset(cols_ses, "^univ_deg")
-cols_nc <- c(str_subset(cols_ses, "^nc_"), "net_hh_inc")
+cols_nc <- c(str_subset(cols_ses, "^nc_"))
 df_ses <- df_ses %>%
   .[, .SD, .SDcols = cols_ses] %>%
   .[, by = "ID_t", (cols_univ) := lapply(.SD, max_fun), .SDcols = cols_univ] %>%

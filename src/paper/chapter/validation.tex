@@ -1,5 +1,15 @@
-validation here
+\subsection{Empirical Strategy}
+The main purpose of this validation exercise is to investigate whether and to what extent differences in the identified parenting styles are associated with differences in (i) the parent-child interaction and (ii) the children's socio-economic environment. I therefore estimate the following Multinomial Logit model
+(see C/T) using maximum likelihood:
+\begin{equation}
+	\text{Pr}(Y_i = m) = \frac{\exp(\x^\top_{i} \be_m + \z^\top_{i} \bm{\gamma}_m)}{\sum_{l=1}^{3} \exp(\x^\top_{i}\be_l + \z^\top_{i} \bm{\gamma}_l)}, \qquad m = 1, 2, 3, \label{eq:multinom}
+\end{equation}
+where the values of $m$ correspond to the parenting styles AV, AR, and PE, respectively and thereby define $Y_i$. $\x_i$ contains individual-level regressors capturing the parental interaction behavior in various dimensions (interviewer rated parental sensitivity, intrusiveness, detachment, stimulation, positive regard, negative regard, and emotionality when dealing their children), while $\z_i$ captures the child's socio-economic environment (mother's age, a dummy indicating that both parent completed upper secondary school, net household income, a dummy indicating whether the parents are married, SES as measured by books at home, the number of siblings when the surveyed child was born, and a measure of time investment).
 
-\subsection{Interaction behaviors}
+Albeit parameter estimates cannot be interpreted causally, they help identify the factors that predict the parenting styles identified though the classification. If the classification captures relevant differences in parenting styles, we expect to see different parental interaction behaviors across classes. For example, authoritarian parents may be more intrusive than other parents while authoritative parents might be stimulating their children more intensively. Similarly, differences in the socio-economic environment such as family structure could differ across parenting styles. According to \textcite{beckerTreatiseFamily1981}, parents probably spend less time with later-born children than with their first-born child.  
+
+\subsection{Results}
+Coefficient estimates from the mmultinomial logit model in ()\ref{eq:multinom}) using the permissive (PE) parenting style as a reference category are shown in table 2.  
+
 \input{../../bld/out/analysis/logit.tex}
 \subsection{SES-variables}

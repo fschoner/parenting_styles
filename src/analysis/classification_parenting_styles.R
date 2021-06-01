@@ -8,7 +8,10 @@ library(mclust)
 library(factoextra)
 library(ggpubr)
 library(xtable)
-
+library(scales)
+library(Cairo)
+library(extrafont)
+#extrafont::loadfonts()
 
 # Paths for datasets.
 path_in_data <- "src/original_data/"
@@ -273,25 +276,24 @@ print(
 
 
 
-cols_std <- c("time_invest", "qib_m", "net_hh_inc", "dis_pat", "sr_sum", "voc_sum")
+cols_std <- c("time_invest", str_subset(names(df_ib_ca), "(p|c)_ib$"))
 df_ib_ca %>%
-  .[, class_plot := factor(class_lab, levels = c("AR", "AV", "PE"))] %>%
+  .[, Class := factor(class_lab, levels = c("AR", "AV", "PE"))] %>%
   #.[, class2_plot := as.factor(sample(c(1:3), size = 1504, replace = TRUE))] %>%
-  .[, (cols_std) := lapply(.SD,  function(x) as.vector(scale(x))), .SDcols = cols_std]
+  .[, (cols_std) := lapply(.SD,  function(x) as.vector(scale(x))), .SDcols = cols_std] %>%
+  setnames(., old = c("time_invest"), new = "Time investment")
 
 fwrite(df_ib_ca, str_c(path_out_data, "df_class_cs.csv"))
 
-t.test(
-  df_ib_ca[class == "AV", "time_invest"],
-  df_ib_ca[class == "PE", "time_invest"],
-  alternative = "t"
-  )
 
-density_cols <- c("time_invest", "qib_m", "net_hh_inc", "dis_pat", "sr_sum", "voc_sum")
-plot_list <- purrr::map(density_cols, density_plot, df = df_ib_ca)
+density_cols <- c("Time investment")
+#plot_list <- unlist(purrr::map(density_cols, density_plot, df = df_ib_ca))
 
-ggarrange(plotlist = plot_list, nrow = 3, ncol = 2,
-          common.legend = TRUE, legend = "bottom")
+#plot <- ggarrange(plotlist = plot_list, nrow = 1, ncol = 1,
+#          common.legend = TRUE, legend = "bottom")
+extrafont::font_import()
+plot <- density_plot(density_cols, df = df_ib_ca)
+ggsave(plot, filename = str_c(path_out_analysis, "time_invest_density.pdf"))
 
 # plot <- ggplot(df_ib_ca, aes(x = time_invest, group = class, fill = class)) +
 #   geom_density(adjust = 1.5, alpha = .4) + 

@@ -149,21 +149,23 @@ density_plot <- function(var, df) {
   '
   ggplot(
     df,
-    aes(x = get(var), group = class_plot, fill = class_plot)
+    aes(x = get(var), group = Class, fill = Class)
   ) +
     geom_density(
       adjust = 1.5, alpha = .4,
       kernel = "gaussian",
       na.rm = TRUE
     ) +
-    theme_ipsum() +
-    ggtitle(var) +
+    theme_bw() +
+    theme(panel.border = element_blank(), plot.title = element_text(size=22)) +
+    #ggtitle(var) +
     labs(
       x = "",
-      y = ""
+      y = "Density",
+      title = "Time investment"
     ) +
-    xlim(-5, 5) +
-    ylim(0, 0.7)
+    xlim(-4, 4) +
+    ylim(0, 0.45)
 }
 
 hist_plot <- function(var, cat, df) {
