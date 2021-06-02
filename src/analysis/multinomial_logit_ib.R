@@ -170,7 +170,7 @@ modelsummary(
   gof_map = gm,
   align = c(rep("l", 2), rep("c", 2)),
   add_rows = rows,
-  output = str_c(path_out_analysis, "logit.tex"),
+  #output = str_c(path_out_analysis, "logit.tex"),
   exponentiate = TRUE
   )
 

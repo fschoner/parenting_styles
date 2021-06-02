@@ -66,8 +66,8 @@ datasummary_balance(~ SES,
                     data = df_summ, 
                     fmt = 3, dinm_statistic = "p.value",
                     #add_rows = pa,
-                    align = c("l", rep("c", 6)),
-                    output = str_c(path_out_analysis, "summ_stats_ses.tex")
+                    align = c("l", rep("c", 7)),
+                    #output = str_c(path_out_analysis, "summ_stats_ses.tex")
                     )
 
 

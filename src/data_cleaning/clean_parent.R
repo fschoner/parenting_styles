@@ -5,8 +5,6 @@ library(data.table)
 library(viridis)
 library(hrbrthemes)
 
-#library(mclust)
-
 
 # Paths for datasets.
 path_in_data <- "src/original_data/"
