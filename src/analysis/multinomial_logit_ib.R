@@ -1,4 +1,4 @@
-
+# Load packages
 library(tidyverse)
 library(data.table)
 library(viridis)
@@ -16,6 +16,7 @@ path_out_analysis <- "bld/out/analysis/"
 
 source("src/functions/functions.r")
 
+# Variables to be standardized
 std_col <- c("age_mom", "net_hh_inc")
 
 df <- fread(str_c(path_out_data, "df_class_cs.csv")) %>%
@@ -56,6 +57,7 @@ df <- fread(str_c(path_out_data, "df_class_cs.csv")) %>%
   ) %>%
   drop_na()
 
+# Relevel
 df$class_lab_2 <- relevel(as.factor(df$class_lab), ref = "PE")
 
 ib_p <- c(
@@ -65,14 +67,14 @@ ib_p <- c(
 
 ses <- c(
   "`Mother's age`", "`High school`", "Income", "`High-SES`", "Siblings",
-  #"`Time investment`",
+  "`Time investment`",
   "Married", "`Migration background`"
 )
-ses_wo_ti <- c(
-  "`Mother's age`", "`High school`", "Income", "`High-SES`", "Siblings",
-  #"`Time investment`",
-  "Married", "`Migration background`"
-)
+# ses_wo_ti <- c(
+#   "`Mother's age`", "`High school`", "Income", "`High-SES`", "Siblings",
+#   #"`Time investment`",
+#   "Married", "`Migration background`"
+# )
 
 fmla_ib <- as.formula(
   str_c("class_lab_2", str_c(ib_p, collapse = " + "), sep = " ~ ")
@@ -80,30 +82,49 @@ fmla_ib <- as.formula(
 fmla_ib_ses <- as.formula(
   str_c("class_lab_2", str_c(c(ib_p, ses), collapse = " + "), sep = " ~ ")
 )
-fmla_ib_ses_zw <- as.formula(
-  str_c("class_lab_2", str_c(c(ib_p, ses_wo_ti), collapse = " + "), sep = " ~ ")
-)
-
-#df[, by = "class", lapply(.SD, mean, na.rm= TRUE), .SDcols = patterns("p_ib$")]
+# fmla_ib_ses_zw <- as.formula(
+#   str_c("class_lab_2", str_c(c(ib_p, ses_wo_ti), collapse = " + "), sep = " ~ ")
+# )
 
 
-#mod_zw <- multinom(fmla_ib_ses_zw, data = df)
-#modelsummary(mod_zw, stars = T)
+# Prepare for modelsummary package
 mdls <- list(
   "(1)" = multinom(fmla_ib, data = df),
   #"(2)" = multinom(fmla_ib_ses_zw, data = df),
   "(2)" = multinom(fmla_ib_ses, data = df)
 ) 
-#summary(mlogit_ib_ses)
-#summary(mlogit)
-#tidy(mlogit_ib)
 
-
+# Add number of observations
 gm <- tibble::tribble(
   ~raw,        ~clean,          ~fmt,
   "nobs",      "N",             0,
   "r.squared", "R<sup>2</sup>", 2
 )
+
+# Spacing for appendix table
+# rows_appendix <- tribble(
+#   ~term, ~y.level, ~`(1)`, ~`(2)`,
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "", "", "", "",
+#   "Further controls?", "", "No", "Yes"
+# )
+# attr(rows_appendix, 'position') <- seq(3, 48, by = 3)
+
+
+# Spacing for standard table
 rows <- tribble(
   ~term, ~y.level, ~`(1)`, ~`(2)`,
   "", "", "", "",
@@ -115,6 +136,7 @@ rows <- tribble(
 )
 attr(rows, 'position') <- c(3, 6, 9, 12, 15, 18)
 
+# Save long output table for the appendix
 modelsummary(
   mdls, stars = TRUE,
   estimate = "{estimate}{stars} ({std.error})",
@@ -128,12 +150,12 @@ modelsummary(
   group = term + y.level ~ model,
   gof_map = gm,
   align = c(rep("l", 2), rep("c", 2)),
-  add_rows = rows,
-  #output = str_c(path_out_analysis, "logit.tex"),
+  #add_rows = rows_appendix,
+  output = str_c(path_out_analysis, "logit_appendix.tex"),
   exponentiate = TRUE
 )
 
-
+# Save output table
 modelsummary(
   mdls, stars = TRUE,
   estimate = "{estimate}{stars} ({std.error})",
@@ -152,73 +174,31 @@ modelsummary(
   exponentiate = TRUE
   )
 
-
-
-
-
-
-
-
-broom::tidy(mlogit_ib, mlogit_ib_ses)
-z <- summary(mlogit)$coefficients/summary(mlogit)$standard.errors
-z
-p <- (1 - pnorm(abs(z), 0, 1)) * 2
-p
-
-exp(coef(mlogit))
-
-
-
-
-# SES regs-
-fmla_ses <- as.formula(
-  str_c(
-    "class_lab_2",
-    str_c(c(
-      "low_ses_books", "age_mom", "siblings_at_birth", "both_p_abi", "net_hh_inc",
-      "married", "migback", "unemp", "fem_child", "net_hh_inc", "time_invest"
-      ), collapse = " + "),
-    sep = " ~ "
-  )
-)
-
-mlogit_ses <- multinom(fmla_ses, data = df)
-modelsummary(mlogit_ses, group = model ~ term, stars = TRUE)
-cor(df$time_invest, df$siblings_at_birth, use = "complete.obs")
-#summary(mlogit)
-
-z <- summary(mlogit_ses)$coefficients/summary(mlogit_ses)$standard.errors
-z
-p <- (1 - pnorm(abs(z), 0, 1)) * 2
-p
-
-
-#fmla HC
-# DO OLS with two dummies, PE as reference category :-)
-fmla_sr <- as.formula(
-  str_c(
-    "dg_waiting_time", str_c(c(
-      "D_av", "D_ar", "age_mom", "siblings_at_birth", "both_p_abi",
-      "fem_child", "net_hh_inc", "low_ses_books",
-      "married", "migback", "unemp", "fem_child", "time_invest"
-    ), collapse = " + "), sep = " ~ "
-  )
-)
-
-fmla_sr_dummies <- as.formula(
-  str_c(
-    "dg_waiting_time", str_c(c(
-      "D_av", "D_ar"
-    ), collapse = " + "), sep = " ~ "
-  )
-)
-
-res_cogn <- lm(fmla_sr, data = df)
-summary(res_cogn)
-vcov_cogn <- sqrt(diag(vcovHC(res_cogn, type = "HC0")))
-
-
-res_cogn_d <- lm(fmla_sr_dummies, data = df)
-summary(res_cogn_d)
-vcov_cogn_d <- sqrt(diag(vcovHC(res_cogn_d, type = "HC0")))
+# (non-cognitive test scores)
+# fmla_sr <- as.formula(
+#   str_c(
+#     "dg_waiting_time", str_c(c(
+#       "D_av", "D_ar", "age_mom", "siblings_at_birth", "both_p_abi",
+#       "fem_child", "net_hh_inc", "low_ses_books",
+#       "married", "migback", "unemp", "fem_child", "time_invest"
+#     ), collapse = " + "), sep = " ~ "
+#   )
+# )
+# 
+# fmla_sr_dummies <- as.formula(
+#   str_c(
+#     "dg_waiting_time", str_c(c(
+#       "D_av", "D_ar"
+#     ), collapse = " + "), sep = " ~ "
+#   )
+# )
+# 
+# res_cogn <- lm(fmla_sr, data = df)
+# summary(res_cogn)
+# vcov_cogn <- sqrt(diag(vcovHC(res_cogn, type = "HC0")))
+# 
+# 
+# res_cogn_d <- lm(fmla_sr_dummies, data = df)
+# summary(res_cogn_d)
+# vcov_cogn_d <- sqrt(diag(vcovHC(res_cogn_d, type = "HC0")))
 

@@ -1,4 +1,4 @@
-
+# Packages
 library(haven)
 library(tidyverse)
 library(data.table)
@@ -11,7 +11,6 @@ library(xtable)
 library(scales)
 library(Cairo)
 library(extrafont)
-#extrafont::loadfonts()
 
 # Paths for datasets.
 path_in_data <- "src/original_data/"
@@ -39,25 +38,8 @@ df_ib_ca <- merge.data.table(df_p_ca, df_ib, by = "ID_t", all = TRUE) %>%
 
 
 # Check a few basic correlations.
-cor(df_ib_ca$qib_m, df_ib_ca$PC1, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$PC1, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$monitoring, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$low_ses_books, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$nc_patience, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$married, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$migback, use = "complete.obs")
-cor(df_ib_ca$time_invest, df_ib_ca$stimulation_p, use = "complete.obs")
 cor(df_ib_ca$time_invest, df_ib_ca$siblings_at_birth, use = "complete.obs")
 cor.test(df_ib_ca$time_invest, df_ib_ca$siblings_at_birth, use = "complete.obs")
-cor.test(df_ib_ca$time_invest, df_ib_ca$married, use = "complete.obs")
-cor.test(df_ib_ca$time_invest, df_ib_ca$unemp, use = "complete.obs")
-cor.test(df_ib_ca$time_invest, df_ib_ca$age_mom, use = "complete.obs")
-cor.test(df_ib_ca$time_invest, df_ib_ca$univ_deg, use = "complete.obs")
-cor.test(df_ib_ca$time_invest, df_ib_ca$migback, use = "complete.obs")
-
-# Plot pairwise scatterplots
-#pairs(df_p_ps[, -1], lower.panel = NULL)
-
 
 
 # Estimate Gaussian Mixture Model
@@ -73,10 +55,6 @@ df_ib_ca %>%
 # Proportions of classes.
 tabulate(gmm$classification) / nrow(df_p_ps)
 # class probabilities
-
-# Plot to investigate BIC's, densities (although I'm unsure what they might tell
-# me).
-#plot(gmm)
 
 
 # Drop high-uncertainty observations.
@@ -104,37 +82,12 @@ mean_class_df <- data.table(
 # Should be able to export this using xtable.
 cols_ps <- names(df_p_ps)[-1]
 df_ib_ca %>%
-  .[,
-    by = "class",
-    lapply(.SD, mean, na.rm = T),
-    .SDcols = cols_ps]
+  .[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = cols_ps]
 
-#t.test(df_ib_ca[class == 1, "power_enforce"], df_ib_ca[class == 2, "power_enforce"])
-# Find out more about classes
 
-#1) What do they mean for interaction behaviors of parents and other parental
-# characteristics?
-summary(df_ib_ca$nc_patience)
-summary(df_ib_ca$dg_waiting_time)
-# both standardized
-
-# Check correlates of class
-df_ib_ca %>%
-  .[, dis_pat := abs(nc_patience - dg_waiting_time)] %>%
-  .[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("_(p|c)$")]
-# 1 are the AV ;-), but they invest less time.
-df_ib_ca %>%
-  .[,
-    by = "class",
-    lapply(.SD, mean, na.rm = T),
-    .SDcols = c(
-      "not_speak", "qib_m", "dg_waited", "dg_waiting_time", "voc_sum", "can4_sc1",
-      "sr_sum", "unemp", "fem_child", "married", "germborn", "migback", "net_hh_inc",
-      "nc_trust", "nc_risk", "nc_patience", "fh_abi", "low_ses_books", "time_invest",
-      "dis_pat", "obedient", "independent", "diligent", "religious", "own_opin",
-      "sense_of_resp", "univ_deg_b", "both_p_abi"
-      )
-    ]
+# Disagreement: patience.
+#df_ib_ca %>%
+#  .[, dis_pat := abs(nc_patience - dg_waiting_time)] 
 
 # Give labels to classes
 df_ib_ca[, class_lab := fcase(
@@ -144,28 +97,13 @@ df_ib_ca[, class_lab := fcase(
 )]
 
 
-df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = patterns("(p|c)_ib$")]
+
+# Parenting goals.
+#df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = c("obedient", "independent", "diligent")]
 
 
-df_ib_ca[, by = "class", lapply(.SD, mean, na.rm = T), .SDcols = c("obedient", "independent", "diligent")]
-t.test(df_ib_ca[class == 1, "diligent"], df_ib_ca[class == 2, "diligent"])
 
-# AV (class 1) sensitive, less intrusive than AR, bit more detached
-# than AV, more stimulating than AV!, more pos_regard, less neg_regard than AV,
-# less emotionality than AV, overall qib roughly the same.
-# p slightly more often unemployed but m slightly less,
-# p and m more often germborn, p more often abi, m substantially more often
-# They have more better tempered c's with lower activity than AV, and their c's
-# have better sustained attention than AV but not PE
-# Class 1 highest SES, is more risk taking, a lot more trusting, less patient
-# than AV, have more income, less migback, more often married. Interestingly, they
-# have substantially more boys.
-# Regarding (non)cognitive skills, their kids have substantially better vocab and son-r
-# scores, and they are more patient.
-
-
-# Compute p-values for mean differences in IB. BUt shouldn't I rather show this as 
-# MultinomialLogit output?
+# Compute p-values for mean differences in IB.
 ib_av_ar <- df_ib_ca %>%
   .[class %in% c(1, 2),] 
 
@@ -256,6 +194,7 @@ ps_mean_pval$Dimension <- c(
   "Psychological control"
 )
 
+# Write this to disk using xtab.
 xtab <- xtable(
   ps_mean_pval,
   type = "latex", digits = c(3), align = c(rep("l", 2), rep("c", 6))
@@ -276,12 +215,7 @@ print(
 
 
 
-
-
-
-
-
-
+# Preparation for plot
 cols_std <- c("time_invest", str_subset(names(df_ib_ca), "(p|c)_ib$"))
 df_ib_ca %>%
   .[, Class := factor(class_lab, levels = c("AR", "AV", "PE"))] %>%
@@ -301,39 +235,6 @@ extrafont::font_import()
 plot <- density_plot(density_cols, df = df_ib_ca)
 ggsave(plot, filename = str_c(path_out_analysis, "time_invest_density.pdf"))
 
-# plot <- ggplot(df_ib_ca, aes(x = time_invest, group = class, fill = class)) +
-#   geom_density(adjust = 1.5, alpha = .4) + 
-#   theme_ipsum()
-# plot
-# 
-# 
-# 
-# 
-# 
-# ggplot(df_ib_ca, aes(x = class, y = low_ses_books, fill = class)) +
-#   geom_boxplot() +
-#   geom_jitter(shape = 16, position = position_jitter(0.2), alpha = 0.5) +
-#   xlab("") +
-#   ylab("") +
-#   ggtitle("Hi") +
-#   labs(fill = "PS")
-# 
-# 
-# 
-# ggplot(df_ib_ca, aes(x = class ,group = low_ses_books)) +
-#   geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count")
-# 
-#   #Density plots for which vars?
-# 
-# df_ib_ca %>%
-#   group_by(class, low_ses_books) %>%
-#   drop_na(class, low_ses_books) %>%
-#   summarize(n() / sum (n()))
-# 
-# ha <- df_ib_ca %>%
-#   .[!is.na("class") & !is.na("low_ses_books")] %>%
-#   .[, by = c("class", "low_ses_books"), .N] %>%
-#   .[, by = c("low_ses_book"), ]
 # 
 # # Try GMM on ib's
 # df_ib_p <- df_ib %>%

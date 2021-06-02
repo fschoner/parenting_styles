@@ -62,12 +62,6 @@ df_summ <- df %>%
   )
 
 
-#pa <- data.frame("A. Child Characteristics", "", "", "", "", "", "")
-#attr(pa, which = "position") <- 1
-
-
-#nrow_df <- rbindlist(list(pa,pb,pc))
-
 datasummary_balance(~ SES,
                     data = df_summ, 
                     fmt = 3, dinm_statistic = "p.value",
@@ -75,14 +69,10 @@ datasummary_balance(~ SES,
                     align = c("l", rep("c", 6)),
                     output = str_c(path_out_analysis, "summ_stats_ses.tex")
                     )
-#datasummary_balance(~ SES,
-#                    data = df_summ, 
-#                    fmt = 3, dinm_statistic = "p.value")
 
-#rownames(new_rows) <- 1
 
-datasummary_balance(~ class_lab,
-            data = df_summ, 
-            fmt = 3, dinm = F)
-            #dinm_statistic = "p.value")
+#datasummary_balance(~ class_lab,
+#            data = df_summ, 
+#            fmt = 3, dinm = F)
+#            dinm_statistic = "p.value")
 

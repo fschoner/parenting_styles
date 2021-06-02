@@ -14,7 +14,9 @@
 \usepackage[sc]{mathpazo}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{graphicx}
 \usepackage{pdfpages}
+\usepackage{caption}
 \hypersetup{
 	colorlinks,
 	%linkcolor={red!70!black},
@@ -35,12 +37,13 @@
 \newcommand{\Y}{\textbf{Y}}
 \newcommand{\be}{\bm{\beta}}
 
-\title{Measuring Parenting Styles\thanks{I would like to thank Marc Stöckli for thoughtful conversations and... .}}
+
+\title{Measuring Parenting Styles\thanks{I would like to thank my supervisor Marc Stöckli for several insightful conversations and Hanna Brosch and Tim Leffler for comments and suggestions.}}
 
 \author{
 	\large Florian Schoner
 }
-%\publishers{\vspace{1em}\small{Supervisor: Prof. Dr. Florian Zimmermann}}
+\publishers{\vspace{2em}{Seminar: Empirical Research on Inequality and Redistribution, Summer Term 2021\\ \normalsize Supervisor: Marc Stöckli}}
 \date{\large \today}
 
 \begin{document}
@@ -50,7 +53,7 @@
 	%Second title page
 	%\title{The Formation of Prosociality:\\ Evidence from Diaries\thanks{I would like to thank Antonia Entorf, Anna Steinberg, Marvin Nöller, Marc Lipfert, and Simon Schulten for helpful comments and suggestions as well as Fabian Kosse and Florian Zimmermann for great supervision.}}
 	\begin{abstract}
-		\noindent\textbf{Abstract}: Survey data capturing parenting behavior are used to classify parenting styles in a data-driven manner using unsupervised machine learning. Whilst the data reveal three classes of parents that emphasize distinct dimensions of the parent-child relationship, providing meaningful labels is difficult. I use data on the parent-child interaction and the childrens' socio-economic environment to provide a richer characterization of the obtained parenting styles. The evidence suggests that parenting style is a function of the number of children.
+		\noindent\textbf{Abstract}: Survey data capturing parenting behavior are used to classify parenting styles in a data-driven manner using unsupervised machine learning. Although the data reveal three classes of parents that emphasize distinct dimensions of the parent-child relationship, they are only partly in line with the classification in \textcite{baumrindChildCarePractices1967}. I use data on the parent-child interaction and the childrens' socio-economic environment to provide a richer characterization of the obtained parenting styles. The evidence suggests that parenting style is a function of the number of children.
 		%\vspace{0in}\\
 		% \noindent\textbf{Keywords:} key1, key2, key3\\
 		%\vspace{0in}\\
@@ -92,15 +95,15 @@
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%Appendix%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	\pagebreak
-%	\appendix
-%	\addsec{Appendix} \label{sec:appendix}
-%	\input{chapter/appendix.tex}
-%	\refstepcounter{section}
-%	\numberwithin{equation}{section}
-%	\numberwithin{figure}{section}
-%	\setcounter{equation}{0}
-%	\setcounter{figure}{0}
+	\pagebreak
+	\appendix
+	\addsec{Appendix} \label{sec:appendix}
+	\input{chapter/appendix.tex}
+	\refstepcounter{section}
+	\numberwithin{equation}{section}
+	\numberwithin{figure}{section}
+	\setcounter{equation}{0}
+	\setcounter{figure}{0}
 %	
 	
 	\clearpage 
