@@ -79,10 +79,6 @@ for (col in names(df_dm)) {
   )
 }
 
-# Actually NEPS has sth on the interaction behavior OF THE CHILD!!!
-# Let's see whether I can think of a way how parents adapt.
-
-
 # Build a cross section 
 cols_dm <- c(names(df_dm)[names(df_dm) %like% "_ib$"], "not_speak")
 df_dm_cs <- df_dm %>%
@@ -113,15 +109,3 @@ ps_pred <- predict(ps_pca)
 df_dm_cs[, c("PC1", "PC2") := list(ps_pred[, 1], ps_pred[, 2])] %>%
   # Write to disc.
   fwrite(., str_c(path_out_data, "df_ib_cs.csv"))
-
-cor(df_dm_cs$PC1, df_dm_cs$qib_m)
-
-# ps_var <- ps_pca$sdev^2
-# # cumulative
-# cumsum(ps_var)/sum(ps_var)
-# # Plot, looks interesting
-# biplot(ps_pca)
-# # predictions
-# ps_pred <- predict(ps_pca)
-#plot(ps_pred[, 1:2], xlab = "PC1", ylab = "PC2")
-# perfectly negatively correlated
