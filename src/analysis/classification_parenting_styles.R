@@ -232,7 +232,7 @@ density_cols <- c("Time investment")
 #plot <- ggarrange(plotlist = plot_list, nrow = 1, ncol = 1,
 #          common.legend = TRUE, legend = "bottom")
 plot <- density_plot(density_cols, df = df_ib_ca)
-ggsave(plot, width = 8, height = 6
+ggsave(plot, width = 8, height = 6,
        filename = str_c(path_out_analysis, "time_invest_density.png"))
 
 # 
