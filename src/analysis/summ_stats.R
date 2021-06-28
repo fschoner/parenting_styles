@@ -21,7 +21,7 @@ df_summ <- df %>%
   ) %>%
   select(
     Female = fem_child,
-    `Migration background` = migback,
+    `Migration back.` = migback,
     # Family structure
     `Siblings` = siblings_at_birth,
     `Married` = married,
@@ -35,7 +35,9 @@ df_summ <- df %>%
     #`Parenting Style` = class_lab,
     SES, class_lab,
     `Time investment*` = "Time investment",
-    # Parenting Styles: not include
+    # Parenting Styles:
+    #`Power. Enforce.` = power_enforce,
+    #``
     # Interaction behaviors
     `Sensitivity*` = sens_n_stress_p_ib,
     `Intrusiveness*` = intrusiveness_p_ib,
